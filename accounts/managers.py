@@ -26,7 +26,7 @@ class UserManager(BaseUserManager):
         
         
         user = self.model(phone_number = phone_number , full_name = full_name , **extra_fields)
-        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_admin", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_active", True)
         user.set_password(password)
