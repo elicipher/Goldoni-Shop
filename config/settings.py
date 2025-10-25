@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     #local apps
     'accounts.apps.AccountsConfig',
+    'products.apps.ProductsConfig',
 
     #third-party apps
     'rest_framework',
