@@ -74,11 +74,9 @@ class UserRegisterSerializers(serializers.ModelSerializer):
             raise serializers.ValidationError("کد ملی باید شامل ۱۰ رقم باشد")
         return value
     
-
  
 
     
-        
 
 
 
