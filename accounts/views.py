@@ -9,6 +9,7 @@ from .serializers import (
 from .models import OTPCode , User
 from rest_framework.throttling import AnonRateThrottle , UserRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
 # Create your views here.
 
 class SendOTPCodeAPIView(APIView):
@@ -199,7 +200,45 @@ class UserRegisterAPIView(mixins.CreateModelMixin , generics.GenericAPIView):
             return Response(serializer_data , status= status.HTTP_201_CREATED )
 
 
+class UserProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
+    """
+    API view for retrieving and updating the authenticated user's profile.
 
+    Permissions:
+        - Only authenticated users can access this view.
+
+    Methods:
+        GET:
+            - Retrieve the current authenticated user's profile.
+            - Returns all fields of the user.
+
+        PUT / PATCH:
+            - Update the current authenticated user's profile.
+            - `partial=True` allows partial updates (PATCH), but validation
+              is still applied to provided fields.
+            - If any field violates serializer validation rules (e.g., required
+              fields are empty, phone number format invalid), a 400 response
+              with details is returned.
+
+    Usage:
+        - The view automatically uses `request.user` as the object to update.
+        - No need to provide a user ID in the URL; each user can only update
+          their own profile.
+    """
+
+    serializer_class = UserRegisterSerializers
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        # فقط کاربر خودش
+        return self.request.user
+    def update(self, request, *args, **kwargs):
+
+        user = self.get_object()
+        serializer = self.serializer_class(user , data = request.data ,partial = True )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data , status= status.HTTP_200_OK)
 
                     
                 
