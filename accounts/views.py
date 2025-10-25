@@ -1,9 +1,14 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from .serializers import SendOTPCodeSerializers , VerifyOTPCodeSerializers
-from .models import OTPCode
+from rest_framework import status , generics , mixins
+from .serializers import (
+    SendOTPCodeSerializers ,
+    VerifyOTPCodeSerializers,
+    UserRegisterSerializers
+    ) 
+from .models import OTPCode , User
 from rest_framework.throttling import AnonRateThrottle , UserRateThrottle
+from rest_framework_simplejwt.tokens import RefreshToken
 # Create your views here.
 
 class SendOTPCodeAPIView(APIView):
@@ -88,16 +93,111 @@ class VerifyOTPCodeAPIView(APIView):
 
     def post(self, request):
         serializer_data = VerifyOTPCodeSerializers(data=request.data)
-        serializer_data.is_valid(raise_exception=True)
+        serializer_data.is_valid(raise_exception=False)
+        phone_number = serializer_data.validated_data["phone_number"]
         if serializer_data.errors :
             if "phone_number" in serializer_data.errors :
                 return Response(serializer_data.errors , status.HTTP_404_NOT_FOUND)
             
             return Response(serializer_data.errors , status=status.HTTP_400_BAD_REQUEST)
-        return Response({"message": "کد صحیح است! ورود موفق."}, status=200)
-
-
+        user = User.objects.filter(phone_number = phone_number ).first()
+        if user :
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                "login":True,
+                "access" : str(refresh.access_token),
+                "refresh":str(refresh),
+            }, status=status.HTTP_200_OK)
         
+        else :
+            return Response({
+                "login":False,
+                "message":"لطفا اطلاعاتتان را پر کنید",
+                "phone_number" : phone_number
+            }, status=status.HTTP_200_OK)
+                
+            
+
+
+class UserRegisterAPIView(mixins.CreateModelMixin , generics.GenericAPIView):
+    """
+    API view for registering a new user and returning JWT tokens.
+
+    This view allows clients to create a new user account by sending a POST request
+    with the required user data. Upon successful registration, it returns the user
+    data along with access and refresh tokens for authentication.
+
+    Attributes:
+        serializer_class (UserRegisterSerializers): 
+            The serializer class used to validate input data and create the user.
+
+    Methods:
+        post(request, *args, **kwargs):
+            Handles POST requests to register a new user.
+
+            Steps performed:
+            1. Instantiate the serializer with request data.
+            2. Validate the input data. If invalid, raises an exception and returns errors.
+            3. Save the validated data to create a new User instance.
+            4. Generate JWT refresh and access tokens for the new user.
+            5. Add the tokens to the serialized user data under the "Token" key.
+            6. Return a Response containing the user data and tokens with HTTP 201 status.
+
+    Request Body:
+        The request must include all required fields defined in UserRegisterSerializers,
+        for example:
+        {
+            "full_name": "Elmira",
+            "phone_number": "09123456789",
+            "national_code": "2345678910",
+            "birthday_date": "2025-08-05",
+            "password": "Elmira123@",
+            "address": "Tehran",
+            "latitude": "11.000000",
+            "longitude": "789.000000",
+
+        }
+
+    Response:
+        On success (HTTP 201):
+        {
+            "full_name": "Elmira",
+            "phone_number": "09123456789",
+            "national_code": "2345678910",
+            "birthday_date": "2025-08-05",
+            ...
+            "Token": {
+                "login": False,
+                "refresh": "<refresh_token_here>",
+                "access": "<access_token_here>"
+            }
+        }
+
+        On validation error (HTTP 400):
+        {
+            "phone_number": ["شماره تلفن باید فقط شامل ۱۱ رقم باشد."],
+            "national_code": ["کد ملی باید ۱۰ رقم باشد."],
+            ...
+        }
+    """
+    
+    serializer_class = UserRegisterSerializers
+    def post(self, request, *args, **kwargs):
+            
+            seri = self.serializer_class(data = request.data)
+            seri.is_valid(raise_exception=True)
+            user = seri.save()
+            refresh = RefreshToken.for_user(user)
+            serializer_data = seri.data
+
+            serializer_data["Token"] = {
+                "login":False,
+                "refresh":str(refresh),
+                "access":str(refresh.access_token)
+            }
+
+            return Response(serializer_data , status= status.HTTP_201_CREATED )
+
 
 
 
