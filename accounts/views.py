@@ -104,14 +104,14 @@ class VerifyOTPCodeAPIView(APIView):
         if user :
             refresh = RefreshToken.for_user(user)
             return Response({
-                "login":True,
+                "is_registered":True,
                 "access" : str(refresh.access_token),
                 "refresh":str(refresh),
             }, status=status.HTTP_200_OK)
         
         else :
             return Response({
-                "login":False,
+                "is_registered":False,
                 "message":"لطفا اطلاعاتتان را پر کنید",
                 "phone_number" : phone_number
             }, status=status.HTTP_200_OK)
@@ -190,8 +190,8 @@ class UserRegisterAPIView(mixins.CreateModelMixin , generics.GenericAPIView):
             refresh = RefreshToken.for_user(user)
             serializer_data = seri.data
 
-            serializer_data["Token"] = {
-                "login":False,
+            serializer_data["token"] = {
+                "is_registered":False,
                 "refresh":str(refresh),
                 "access":str(refresh.access_token)
             }
