@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import OTPCode
+from .models import OTPCode , User 
+
 
 
 class SendOTPCodeSerializers(serializers.Serializer):
@@ -47,7 +48,37 @@ class VerifyOTPCodeSerializers(serializers.Serializer):
 
         return data
 
+
+        
+class UserRegisterSerializers(serializers.ModelSerializer):
+    address = serializers.CharField(required = True)
+    birthday_date = serializers.DateField(required = True)
+    latitude = serializers.DecimalField(required = True  , max_digits= 9  , decimal_places= 6)
+    longitude = serializers.DecimalField(required = True , max_digits= 9  , decimal_places= 6)
+
+
+
+    class Meta:
+        model = User
+        exclude = ("is_active","is_admin","is_superuser",)
+
+    def validate_phone_number(self, value ):
+        if not value.isdigit() or len(value) != 11:
+            raise serializers.ValidationError("شماره تلفن باید فقط شامل ۱۱ رقم باشد.")
+        if not value.startswith("09") : 
+            raise serializers.ValidationError("شماره تلفن نامعتبر است")
+        return value
+    
+    def validate_national_code(self, value):
+        if len(value) != 10  or not value.isdigit() :
+            raise serializers.ValidationError("کد ملی باید شامل ۱۰ رقم باشد")
+        return value
+    
+
+ 
+
+    
         
 
 
-    
+

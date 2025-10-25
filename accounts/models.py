@@ -10,13 +10,20 @@ import random
 class User(AbstractBaseUser):
 
     full_name = models.CharField(max_length=200)
-    address = models.CharField(max_length=500)
-    phone_number = models.CharField(max_length=11 , unique= True)
-    national_code = models.CharField(max_length=10)
-    birthday_date = jmodels.jDateField(null=True , blank=True)
+    address = models.CharField(max_length=500 , null = True )
+    phone_number = models.CharField(max_length=11, unique=True , blank= False)
+    national_code = models.CharField(max_length=10 , null= True , blank= False , unique= True)
+    birthday_date = jmodels.jDateField(null=True , blank= False)
+    
     is_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    is_superuser = models.BooleanField(default=True)
+    is_superuser = models.BooleanField(default=False)
+    
+    latitude = models.DecimalField(max_digits=9, decimal_places=6 , null=True , blank= False)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6 , null=True , blank= False)
+    
+    last_login = models.DateTimeField(auto_now=True)
+
 
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = ["full_name" , ]
@@ -39,18 +46,11 @@ class User(AbstractBaseUser):
         # Simplest possible answer: All admins are staff
         return self.is_admin
 
-
-
-class Location(models.Model):
-
-    user = models.ForeignKey(User , on_delete=models.CASCADE , related_name="user_location")
-    latitude = models.DecimalField(max_digits=9, decimal_places=6)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6)
-
-
     def __str__(self):
+        return f"{self.full_name} , {self.phone_number}"
 
-        return f"{self.name} ({self.latitude}, {self.longitude})"
+
+
 
 
 class OTPCode(models.Model):
