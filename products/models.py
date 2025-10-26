@@ -2,6 +2,8 @@ from django.db import models
 from django.core.validators import MinValueValidator ,MaxValueValidator
 from accounts.models import User
 from PIL import Image
+from django.db.models import Avg
+
 
 # Create your models here.
 def validate_real_image(value):
@@ -40,6 +42,11 @@ class Product(models.Model):
     final_price = models.PositiveBigIntegerField(default=0)
     status = models.CharField(choices=STATUS_CHOICE, max_length=100, default="unavailable")
     created_at = models.DateTimeField(auto_now=True)
+
+
+    def average_stars(self):
+        result = self.comments.filter(status = 'approved').aggregate(avg=Avg("stars"))["avg"]
+        return result or 0
     
 
     def save(self, *args, **kwargs):
@@ -69,7 +76,7 @@ class ProductImage(models.Model):
 
 
 
-class Like(models.Model):
+class ProductLike(models.Model):
 
     user = models.ForeignKey(User , on_delete= models.CASCADE , related_name="user_likes")
     product = models.ForeignKey(Product , on_delete= models.CASCADE , related_name="produt_like")
@@ -79,3 +86,39 @@ class Like(models.Model):
             models.UniqueConstraint(fields=['user','product'] , name="uniqe_user_product_like")
         ]
 
+
+class Comment(models.Model):
+
+    STATUS_CHOICES = [
+        ('approved', 'تأیید شده'),
+        ('pending', 'در انتظار تأیید'),
+        ('rejected', 'رد شده'),
+    ]
+
+
+    product = models.ForeignKey(Product , on_delete=models.CASCADE , related_name='comments')
+    user = models.ForeignKey(User , on_delete=models.CASCADE , related_name= "user_comments" )
+    stars = models.PositiveIntegerField(default=0 , validators=[MinValueValidator(0),MaxValueValidator(5)])
+    text = models.TextField()
+    status = models.CharField(choices=STATUS_CHOICES , default='pending',max_length=28)
+    is_buyer = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.product}"
+    
+    def like_count(self):
+        return self.likes.filter(is_like = True).count()
+    
+    def dislike_count(self):
+        return self.likes.filter(is_like = False).count()
+    
+
+class CommentLike(models.Model):
+
+    user = models.ForeignKey(User , on_delete=models.CASCADE , related_name="comments_like")
+    comment = models.ForeignKey(Comment , on_delete=models.CASCADE , related_name="likes")
+    is_like = models.BooleanField()
+
+    class Meta:
+        unique_together = ("user","comment")
