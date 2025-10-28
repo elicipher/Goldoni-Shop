@@ -17,8 +17,13 @@ def validate_real_image(value):
 
 
 class Category(models.Model):
-    title = models.CharField(max_length=250)
+
+    title = models.CharField(max_length=250 , unique= True)
+    icon = models.ImageField(upload_to="category_images/" , validators=[validate_real_image])
     description = models.TextField(null= True , blank= True)
+
+ 
+
 
     def __str__(self):
         return self.title 
@@ -29,10 +34,12 @@ class Product(models.Model):
         ('available', 'موجود'),
         ('unavailable', 'ناموجود'),
     ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    main_image = models.ImageField(upload_to='product_image/' ,validators=[validate_real_image])
     title = models.CharField(max_length=200)
     description = models.TextField()
-    category = models.ForeignKey(Category , on_delete=models.SET_NULL , related_name="products" , null= True , blank= True)
+    category = models.ForeignKey(Category , on_delete=models.CASCADE , related_name="products" )
     price = models.PositiveIntegerField(default=0)
     discount = models.PositiveSmallIntegerField(
         default=0,
@@ -42,11 +49,15 @@ class Product(models.Model):
     final_price = models.PositiveBigIntegerField(default=0)
     status = models.CharField(choices=STATUS_CHOICE, max_length=100, default="unavailable")
     created_at = models.DateTimeField(auto_now=True)
+    
 
 
     def average_stars(self):
         result = self.comments.filter(status = 'approved').aggregate(avg=Avg("stars"))["avg"]
-        return result or 0
+        if result is None:
+            return 0.0
+        rounded = round(result * 2) / 2
+        return float(f"{rounded:.1f}")
     
 
     def save(self, *args, **kwargs):
