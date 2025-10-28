@@ -35,14 +35,14 @@ class VerifyOTPCodeSerializers(serializers.Serializer):
         try:
             otp_obj = OTPCode.objects.get(phone_number=phone_number)
         except OTPCode.DoesNotExist:
-            raise serializers.ValidationError({"phone_number": "کد یافت نشد"})
+            raise serializers.ValidationError({"message": "کد یافت نشد"})
 
         if otp_obj.check_and_delete_expired():
             otp_obj.delete()
-            raise serializers.ValidationError({"code": "کد منقضی شده است."})
+            raise serializers.ValidationError({"message": "کد منقضی شده است."})
 
         if otp_obj.code != code:
-            raise serializers.ValidationError({"code": "کد اشتباه است."})
+            raise serializers.ValidationError({"message": "کد اشتباه است."})
 
         otp_obj.delete()
 
