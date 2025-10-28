@@ -94,13 +94,10 @@ class VerifyOTPCodeAPIView(APIView):
 
     def post(self, request):
         serializer_data = VerifyOTPCodeSerializers(data=request.data)
-        serializer_data.is_valid(raise_exception=False)
+        serializer_data.is_valid(raise_exception=True)
+
         phone_number = serializer_data.validated_data["phone_number"]
-        if serializer_data.errors :
-            if "phone_number" in serializer_data.errors :
-                return Response(serializer_data.errors , status.HTTP_404_NOT_FOUND)
-            
-            return Response(serializer_data.errors , status=status.HTTP_400_BAD_REQUEST)
+
         user = User.objects.filter(phone_number = phone_number ).first()
         if user :
             refresh = RefreshToken.for_user(user)
