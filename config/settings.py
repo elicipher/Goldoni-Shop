@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     #third-party apps
     'rest_framework',
     'django_jalali',
+    'drf_spectacular',
 
 ]
 
@@ -150,6 +151,16 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 
 
+
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Goldoni Api',
+    'DESCRIPTION': 'يک ای پی آی مخصوص  اپلیکیشن فروشگاهی شما',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # OTHER SETTINGS
 }
