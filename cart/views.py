@@ -1,15 +1,29 @@
 from rest_framework.views import APIView 
 from rest_framework.generics import RetrieveUpdateDestroyAPIView , ListAPIView , CreateAPIView
 from .models import Cart , CartItem , Order , OrderItem
-from .serializers import CartItemCreateSerializer , CartItemListSerializers
+from .serializers import CartItemCreateSerializer , CartSerializers , CartItemListSerializers
 from rest_framework.response import Response
 from rest_framework import status
 
 # Create your views here.
 
-
-
 class CartAddItemView(CreateAPIView):
+    """
+    Add or remove a product from the user's cart.
+
+    POST request behavior:
+    - If the product already exists in the cart, it will be removed.
+    - If the product does not exist in the cart, it will be added with the specified quantity.
+
+    Expected request data:
+    {
+        "product": <product_id>,
+        "quantity": <optional, default=1>
+    }
+
+    Response:
+    - 200 OK with a message indicating whether the item was added or removed.
+    """
     serializer_class = CartItemCreateSerializer
 
     def post(self, request, *args, **kwargs):
@@ -29,32 +43,76 @@ class CartAddItemView(CreateAPIView):
             return Response({"message": "کالا به سبد خرید شما اضافه شد"}, status=status.HTTP_200_OK)
         
     def perform_create(self, serializer, cart, quantity):
+        """Create a new CartItem in the cart with the specified quantity."""
         CartItem.objects.create(
             product=serializer.validated_data["product"],
             quantity=quantity,
             cart=cart
         )
 
-            
+
 class CartItemUpdateView(RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update, or delete a single CartItem belonging to the current user.
+
+    GET request:
+    - Retrieve details of a single cart item.
+
+    PATCH/PUT request:
+    - Update quantity of the cart item.
+
+    DELETE request:
+    - Remove the cart item from the cart.
+    """
     queryset = CartItem.objects.all()
+
     def get_queryset(self):
-        return CartItem.objects.filter(cart__user = self.request.user)
+        """Return only the cart items that belong to the current user."""
+        return CartItem.objects.filter(cart__user=self.request.user)
     
     def get_serializer_class(self):
-        if self.request.method in ['PATCH' , 'DELETE' , 'PUT']:
+        """
+        Use CartItemCreateSerializer for PATCH, PUT, DELETE operations.
+        Use CartItemListSerializers for GET operation.
+        """
+        if self.request.method in ['PATCH', 'DELETE', 'PUT']:
             return CartItemCreateSerializer
         return CartItemListSerializers
-    
+
 
 class CartItemListView(ListAPIView):
-    serializer_class = CartItemListSerializers
-    queryset = CartItem.objects.all()
+    """
+    List all carts of the current user along with their items.
+
+    GET request:
+    - Returns a list of carts.
+    - Each cart includes its total price and list of items.
+
+    Example response:
+    [
+        {
+            "id": 1,
+            "user": 1,
+            "total_price": 2500,
+            "items": [
+                {
+                    "id": 1,
+                    "product": {...},
+                    "quantity": 2,
+                    "total_price": 1000
+                },
+                ...
+            ]
+        },
+        ...
+    ]
+    """
+    serializer_class = CartSerializers
+    queryset = Cart.objects.all()
 
     def get_queryset(self):
-        return CartItem.objects.filter(cart__user = self.request.user)
-    
-
+        """Return only the carts that belong to the current user."""
+        return Cart.objects.filter(user=self.request.user)
 
 
 
