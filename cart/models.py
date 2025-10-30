@@ -2,16 +2,24 @@ from django.db import models
 from products.models import Product
 from django.conf import settings
 from django.core.validators import MinValueValidator , MaxValueValidator
+from uuid import uuid4
+import random
+from django.utils.translation import gettext_lazy as _
+
+
+
 # Create your models here.
 class Cart(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL , on_delete=models.CASCADE , related_name="cart")
+    user = models.OneToOneField(settings.AUTH_USER_MODEL , on_delete=models.CASCADE , related_name="cart")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def total_price(self):
-        return sum(item.total_price() for item in self.items.all())
+        return sum(item.total_price() for item in self.items.all()) or 0
     
     def __str__(self):
         return f"Cart of {self.user.full_name} - {self.user.phone_number}"
+    
+
 
 
 class CartItem(models.Model):
@@ -25,6 +33,11 @@ class CartItem(models.Model):
     def __str__(self):
         return f"{self.quantity} x {self.product.title}"
     
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['product' , "cart"], name='unique_carts_items')
+        ]
+    
 class Order(models.Model):
 
     STATUS_CHOICES = [
@@ -32,27 +45,54 @@ class Order(models.Model):
         ('delivered', 'تحویل داده شده'),
         ('returned', 'مرجوع شده'),
     ]
-    PAYMENT_METHOD_CHOICES = [
-        ('online', 'پرداخت آنلاین'),
-        ('cod', 'پرداخت درب منزل'),
-    ]
 
 
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    cart = models.OneToOneField(Cart, on_delete=models.CASCADE)
-    total_amount = models.PositiveIntegerField()
+
+    id = models.UUIDField(default= uuid4 , editable=False , unique=True , primary_key=True , verbose_name=_("آیدی" ))
+    order_code = models.CharField(max_length=9, unique=True, editable=False , verbose_name=_("کد سفارش"))
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE )
+    total_amount = models.PositiveIntegerField(default=0)
     is_paid = models.BooleanField(default=False)
-    status = models.CharField(max_length=50,choices=STATUS_CHOICES)
-    payment_method = models.CharField(max_length=50, choices=PAYMENT_METHOD_CHOICES, default='online')
+    status = models.CharField(max_length=50,choices=STATUS_CHOICES , default="shipping" , verbose_name=_("وضعیت"))
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+    
+    def save(self, *args ,**kwargs):
+        if not self.order_code :
+            self.order_code = self.generate_code()
+        super().save(*args, **kwargs)
 
-    def total_amount(self):
-        return self.cart.total_price()
+
+    def generate_code(self):
+        """ساخت کد سفارش ۹ رقمی یکتا """
+        while True :
+            code = str(random.randint(100000000 , 999999999))
+            if not Order.objects.filter(order_code=code).exists():
+                return code
+            
 
     def __str__(self):
-        return f"Order #{self.id} - {self.user.full_name}"
+        return f"Order #{self.order_code} - {self.user.full_name}"
+
+
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order , on_delete=models.CASCADE , related_name="items")
+    product = models.ForeignKey(Product , on_delete=models.CASCADE)
+    quantity = models.PositiveSmallIntegerField(validators=[MinValueValidator(1) , MaxValueValidator(10)],default=1) 
+
+    def total_price(self):
+        return self.product.final_price * self.quantity
+    
+    def __str__(self):
+        return f"{self.quantity} x {self.product.title}"
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['product' , 'order'], name='unique_order_items')
+        ]
 
 
