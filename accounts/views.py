@@ -9,7 +9,7 @@ from .serializers import (
 from .models import OTPCode , User
 from rest_framework.throttling import AnonRateThrottle , UserRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated , AllowAny
 # Create your views here.
 
 class SendOTPCodeAPIView(APIView):
@@ -46,6 +46,7 @@ class SendOTPCodeAPIView(APIView):
     
     
     """
+    permission_classes = [AllowAny]
     throttle_classes = [AnonRateThrottle , UserRateThrottle]
 
     def post(self , request) :
@@ -91,7 +92,7 @@ class VerifyOTPCodeAPIView(APIView):
         - 429 Too Many Requests if throttling limit is exceeded
     """
     throttle_classes = [AnonRateThrottle , UserRateThrottle]
-
+    permission_classes = [AllowAny]
     def post(self, request):
         serializer_data = VerifyOTPCodeSerializers(data=request.data)
         serializer_data.is_valid(raise_exception=True)
@@ -178,7 +179,7 @@ class UserRegisterAPIView(mixins.CreateModelMixin , generics.GenericAPIView):
             ...
         }
     """
-    
+    permission_classes = [AllowAny]
     serializer_class = UserRegisterSerializers
     def post(self, request, *args, **kwargs):
             
