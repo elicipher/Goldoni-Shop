@@ -1,9 +1,10 @@
 from rest_framework.views import APIView 
-from rest_framework.generics import RetrieveUpdateDestroyAPIView , ListAPIView , CreateAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView , ListAPIView , CreateAPIView 
 from .models import Cart , CartItem , Order , OrderItem
-from .serializers import CartItemCreateSerializer , CartSerializers , CartItemListSerializers
+from .serializers import CartItemCreateSerializer , CartSerializers , CartItemListSerializers , OrderSerializers , OrderItemSerializers
 from rest_framework.response import Response
 from rest_framework import status
+from django.db import transaction
 
 # Create your views here.
 
@@ -115,5 +116,42 @@ class CartItemListView(ListAPIView):
         return Cart.objects.filter(user=self.request.user)
 
 
+class OrderCreateView(APIView):
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        cart = Cart.objects.filter(user = user).first()
+        if not cart or not cart.items.exists():
+            return Response({"message":"سبد خرید شما خالی است."} , status= status.HTTP_400_BAD_REQUEST)
+        
+        with transaction.atomic():
+            order = Order.objects.create(user = user , total_amount = cart.total_price())
+            for item in cart.items.all():
+                OrderItem.objects.create(
+                    order=order,
+                    product=item.product,
+                    quantity=item.quantity,
+                )
+            cart.items.all().delete()
+         
+    
+        return Response({"message": "سفارش شما ثبت شد", "order_id": order.id}, status=status.HTTP_201_CREATED)
+
+class OrderListshippingView(ListAPIView):
+    serializer_class = OrderSerializers
+    queryset = Order.objects.all()
+
+    def get_queryset(self):
+        return Order.objects.filter(status  = "shipping" , user = self.request.user)
+    
+class OrderItemRetrieveView(RetrieveUpdateDestroyAPIView):
+    serializer_class = OrderItemSerializers
+    queryset = OrderItem.objects.all()
+    lookup_field = 'order_id'
+
+    def get_queryset(self):
+        order_id = self.kwargs.get('order_id')
+
+        return OrderItem.objects.filter(order__user = self.request.user  , order__id = order_id)
+    
 
 
