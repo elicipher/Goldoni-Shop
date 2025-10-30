@@ -5,6 +5,7 @@ from .serializers import CartItemCreateSerializer , CartSerializers , CartItemLi
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
+from rest_framework.permissions import IsAuthenticated 
 
 # Create your views here.
 
@@ -26,7 +27,7 @@ class CartAddItemView(CreateAPIView):
     - 200 OK with a message indicating whether the item was added or removed.
     """
     serializer_class = CartItemCreateSerializer
-
+    permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -65,6 +66,8 @@ class CartItemUpdateView(RetrieveUpdateDestroyAPIView):
     DELETE request:
     - Remove the cart item from the cart.
     """
+    permission_classes = [IsAuthenticated]
+
     queryset = CartItem.objects.all()
 
     def get_queryset(self):
@@ -108,6 +111,8 @@ class CartItemListView(ListAPIView):
         ...
     ]
     """
+    permission_classes = [IsAuthenticated]
+
     serializer_class = CartSerializers
     queryset = Cart.objects.all()
 
@@ -117,6 +122,8 @@ class CartItemListView(ListAPIView):
 
 
 class OrderCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, *args, **kwargs):
         user = request.user
         cart = Cart.objects.filter(user = user).first()
@@ -137,6 +144,8 @@ class OrderCreateView(APIView):
         return Response({"message": "سفارش شما ثبت شد", "order_id": order.id}, status=status.HTTP_201_CREATED)
 
 class OrderListshippingView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+
     serializer_class = OrderSerializers
     queryset = Order.objects.all()
 
