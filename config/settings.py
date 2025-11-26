@@ -46,7 +46,9 @@ INSTALLED_APPS = [
     #third-party apps
     'rest_framework',
     'django_jalali',
-    'drf_spectacular',
+    # 'drf_spectacular',
+    'drf_yasg',
+    'django_extensions',
 
 ]
 
@@ -151,7 +153,12 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # 'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    #     'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'rest_framework.authentication.SessionAuthentication',
+    #     'rest_framework.authentication.BasicAuthentication',
+    #     'rest_framework.authentication.TokenAuthentication',
+    # ],
 
 
 
@@ -162,6 +169,7 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'يک ای پی آی مخصوص  اپلیکیشن فروشگاهی شما',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+
     # OTHER SETTINGS
 }
 
@@ -169,9 +177,22 @@ import os
 
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')   
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
+    'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_yasg.inspectors.SwaggerAutoSchema',
+}
