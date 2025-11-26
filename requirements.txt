@@ -5,12 +5,14 @@ charset-normalizer==3.4.4
 coreapi==2.3.3
 coreschema==0.0.4
 Django==5.2.7
+django-extensions==4.1
 django-filter==25.2
 django-jalali==7.4.0
 django-rest-swagger==2.2.0
 djangorestframework==3.16.1
 djangorestframework_simplejwt==5.5.1
 drf-spectacular==0.28.0
+drf-yasg==1.21.11
 idna==3.11
 inflection==0.5.1
 itypes==1.2.0
@@ -22,8 +24,12 @@ jsonschema-specifications==2025.9.1
 Markdown==3.9
 MarkupSafe==3.0.3
 openapi-codec==1.3.2
+packaging==25.0
 pillow==12.0.0
+pydot==4.0.1
 PyJWT==2.10.1
+pyparsing==3.2.5
+pytz==2025.2
 PyYAML==6.0.3
 referencing==0.37.0
 requests==2.32.5
