@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
-from django_jalali.db import models as jmodels
 from .managers import UserManager
 from django.utils import timezone
 from datetime import timedelta
@@ -13,15 +12,15 @@ class User(AbstractBaseUser):
     address = models.CharField(max_length=500 , null = True )
     phone_number = models.CharField(max_length=11, unique=True , blank= False)
     national_code = models.CharField(max_length=10 , null= True , blank= False , unique= True)
-    birthday_date = jmodels.jDateField(null=True , blank= False)
-    
+    birthday_date = models.CharField(max_length=10 )
+
     is_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
-    
+
     latitude = models.DecimalField(max_digits=9, decimal_places=6 , null=True , blank= False)
     longitude = models.DecimalField(max_digits=9, decimal_places=6 , null=True , blank= False)
-    
+
     last_login = models.DateTimeField(auto_now=True)
 
 
@@ -61,11 +60,11 @@ class OTPCode(models.Model):
 
     def __str__(self):
         return self.phone_number
-    
+
     def check_and_delete_expired(self):
-        
+
         return timezone.now() > self.created + timedelta(minutes= 2)
-    
+
     def generate_otp(self):
 
         self.code = str(random.randint(100000,999999))

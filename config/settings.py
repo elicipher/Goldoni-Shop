@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-le74#-o237l)3o6u7_pi-0*wda)b2)qcf%)!9*kd=)#q&lonbv
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['Goldonisite12.pythonanywhere.com']
 
 
 # Application definition
@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     #third-party apps
     'rest_framework',
     'django_jalali',
-    'drf_spectacular',
+    # 'drf_spectacular',
+    'drf_yasg',
 
 ]
 
@@ -141,17 +142,22 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle'
     ],
 
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '10/hour',
-        'user': '10/hour'
-    },
+    # 'DEFAULT_THROTTLE_RATES': {
+    #     'anon': '10/hour',
+    #     'user': '10/hour'
+    # },
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # 'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    #     'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'rest_framework.authentication.SessionAuthentication',
+    #     'rest_framework.authentication.BasicAuthentication',
+    #     'rest_framework.authentication.TokenAuthentication',
+    # ],
 
 
 
@@ -162,6 +168,7 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'يک ای پی آی مخصوص  اپلیکیشن فروشگاهی شما',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+
     # OTHER SETTINGS
 }
 
@@ -169,9 +176,23 @@ import os
 
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')   
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'JWT Authorization header using the Bearer scheme. Example: "Bearer <token>"'
+        }
+    },
+    'USE_SESSION_AUTH': False,  # اگه با JWT کار می‌کنی اینو False بزار
+    'DEFAULT_MODEL_RENDERING': 'example',
+}
