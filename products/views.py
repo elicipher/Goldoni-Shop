@@ -6,7 +6,8 @@ from .models import Product , Category , ProductLike , CommentLike , Comment
 from django.db.models import Avg, Q 
 from rest_framework.generics import ListAPIView , RetrieveAPIView 
 from rest_framework.permissions import IsAuthenticated
-
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 # Create your views here.
 
@@ -23,6 +24,17 @@ class ProductRetrieveApiView(RetrieveAPIView):
     serializer_class = ProductRetrieveSerializers
     queryset = Product.objects.all()
     lookup_field = "pk"
+    @swagger_auto_schema(
+            tags=["products"],
+            operation_summary="جزئیات محصول",
+            operation_description="""
+            این ویو جزئیات محصول را نمایش میدهد. و تنها پارامتر مورد نیاز آیدی محصول است.
+            توکن :‌نیاز ندارد.
+
+            """
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
 # region  Lists
@@ -40,7 +52,21 @@ class ProductListIndexApiView(APIView):
         Response: serialized data in JSON format with HTTP 200 status
     """
     
+    @swagger_auto_schema(
+            tags=["home views"],
+            operation_summary="نمایش محصولات در صفحه اول",
+            operation_description="""
+            این ویو محصولات را در سه دسته بندی نمایش می دهد.
+            - categories : نمایش دسته بندی های موجود
+            - amazing_sale : نمایش محصولاتی که تخفیف دارند.
+            - top_products : محصولاتی که پنج ستاره دارند.
+            - new_products : محصولات جدید.
+            توکن :‌نیاز ندارد.
 
+            """
+           
+     
+    )
     def get(self , request):
 
 
@@ -69,9 +95,22 @@ class CategoryListApiView(ListAPIView):
     Returns:
         Response: serialized list of categories in JSON format.
     """
-    
+
     serializer_class = CategorySerializers
     queryset = Category.objects.all()
+    @swagger_auto_schema(
+            tags=["home views"],
+            operation_summary="لیست دسته بندی",
+            operation_description="""
+            لیست دسته بندی های موجود را برمیگرداند
+            توکن :‌نیاز ندارد.
+
+            """
+           
+     
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 class ProductListByCategoryApiView(ListAPIView):
     """
@@ -84,9 +123,22 @@ class ProductListByCategoryApiView(ListAPIView):
         Response: serialized list of products filtered by category.
     """
     serializer_class = ProductSerializers
+
     def get_queryset(self):
         category_id = self.kwargs["category_id"]
         return Product.objects.filter(category_id =  category_id)
+    
+    @swagger_auto_schema(
+            tags=["home views"],
+            operation_summary="نمایش محصولات بر اساس دسته بندی",
+            operation_description="""
+            لیست  محصولات را بر اساس دسته بندی نمایش می دهد. فقط آیدی دسته بندی را میگیرد.
+            توکن :‌نیاز ندارد.
+
+            """
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 class ProductAmazingListApiView(ListAPIView):
     """
@@ -95,6 +147,18 @@ class ProductAmazingListApiView(ListAPIView):
     """
     serializer_class = ProductSerializers
     queryset = Product.objects.filter(discount__gt = 0)
+    @swagger_auto_schema(
+            tags=["home views"],
+            operation_summary="لیست محصولات شگفت انگیز",
+            operation_description="""
+       این ویو لیست محصولاست ویژه که تخفیف خورده اند را بر میگرداند.
+            توکن :‌نیاز ندارد.
+
+            """
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
 
 class TopProductListApiView(ListAPIView):
     """
@@ -105,6 +169,18 @@ class TopProductListApiView(ListAPIView):
     def get_queryset(self):
         product = Product.objects.annotate(average_stars=Avg("comments__stars", filter=Q(comments__status="approved")))
         return product.filter(average_stars = 5)
+    
+    @swagger_auto_schema(
+            tags=["home views"],
+            operation_summary="لیست محصولات  برتر",
+            operation_description="""
+       لیست محصولاتی که پنج ستاره دارند را برمیگرداند.
+            توکن :‌نیاز ندارد.
+
+            """
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 class NewProductListApiView(ListAPIView):
     """
@@ -113,6 +189,18 @@ class NewProductListApiView(ListAPIView):
     """
     serializer_class = ProductSerializers
     queryset = Product.objects.order_by("-created_at")
+
+    @swagger_auto_schema(
+            tags=["home views"],
+            operation_summary="لیست جدید ترین محصولات",
+            operation_description="""
+        لیست محصولات جدید را نمایش میدهد
+            توکن :‌نیاز ندارد.
+
+            """
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
     
 # endregion
 
@@ -163,7 +251,25 @@ class LikeAndDislikeCommentAPIView(APIView):
             Returned when the comment does not exist or is not approved.
     """
     permission_classes = [IsAuthenticated]
+    @swagger_auto_schema(
+            tags=["products"],
+            operation_summary="لایک و دیس لایک کامنت",
+            operation_description="""
+            این ویو امکان لایک و دیس لایک کردن کامنت را را انجام میدهد.
+            وقتی مقدار لایک برابر باشه با true لایک میخورد و اگر دوباره این مقدار ارسال شود لایک حذف میشود.
+            وقتی مقدار لایک برابر باشه با false دیس لایک میخورد و اگر دوباره این مقدار ارسال شود دیس لایک حذف میشود.
+            توکن :‌نیاز دارد.
 
+            """,
+            request_body=LikeAndDislikeSerializers,
+            responses={
+                200:"deleted like/dislike",
+                201:"created like/dislike",
+                404:"Not found comment",
+                400:"Bad request",
+
+            }
+    )
     def post(self, request, comment_id):
         try:
             comment = Comment.objects.get(pk=comment_id , status = "approved")
@@ -235,18 +341,87 @@ class LikeProductApiView(APIView):
             Returned when the product with the given ID does not exist.
     """
     permission_classes = [IsAuthenticated,]
-    def post(self , request):
+    @swagger_auto_schema(
+    tags=["products"],
+    operation_summary="لایک یا آنلایک محصول",
+    operation_description="""
+این ویو برای لایک کردن محصول است. اگر کاربر قبلاً محصول را لایک کرده باشد، 
+با صدا زدن دوباره این API، لایک حذف می‌شود.
+
+پارامترهای لازم:
+- product_id: آیدی محصول
+- توکن نیاز دارد (کاربر باید لاگین باشد)
+""",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=["product_id"],
+        properties={
+            "product_id": openapi.Schema(
+                type=openapi.TYPE_INTEGER,
+                example=12,
+                description="آیدی محصولی که قرار است لایک شود"
+            )
+        }
+    ),
+    responses={
+        200: openapi.Response(
+            description="وضعیت لایک",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "liked": openapi.Schema(
+                        type=openapi.TYPE_BOOLEAN,
+                        example=True
+                    )
+                }
+            )
+        ),
+        400: openapi.Response(
+            description="پارامتر ناقص",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "error": openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        example="product_id is required"
+                    )
+                }
+            )
+        ),
+        404: openapi.Response(
+            description="محصول یافت نشد",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "error": openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        example="Product not found"
+                    )
+                }
+            )
+        )
+    }
+)
+
+    def post(self, request):
         user = request.user
         product_id = request.data.get("product_id")
-        if not product_id :
-            return Response({"error":"product_id is requierd"} , status=status.HTTP_400_BAD_REQUEST)
-        product = Product.objects.get(pk=product_id)
 
-        like , created = ProductLike.objects.get_or_create(product = product , user = user)
-        if not created :
+        if not product_id:
+            return Response({"error": "product_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            product = Product.objects.get(pk=product_id)
+        except Product.DoesNotExist:
+            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        like, created = ProductLike.objects.get_or_create(product=product, user=user)
+
+        if not created:
             like.delete()
             return Response({"liked": False}, status=status.HTTP_200_OK)
-        
-        return Response({"like":False} , status=status.HTTP_200_OK)
+
+        return Response({"liked": True}, status=status.HTTP_200_OK)
+
 
 # endregion

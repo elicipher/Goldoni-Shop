@@ -10,44 +10,46 @@ from .models import OTPCode , User
 from rest_framework.throttling import AnonRateThrottle , UserRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated , AllowAny
+from drf_yasg.utils import swagger_auto_schema 
+from drf_yasg import openapi
+
 # Create your views here.
 
 class SendOTPCodeAPIView(APIView):
-    """
-    API endpoint for sending an OTP (One-Time Password) code to a user's phone number.
 
-    This view accepts a POST request with a phone number, generates a new OTP code,
-    and returns it in the response. If there is already an existing OTP for the
-    same phone number, it will be deleted before generating a new one.
-
-    Throttling:
-        - Anonymous users: limited to 10 requests per hour
-        - Authenticated users: limited to 10 requests per hour
-
-    Request body (JSON):
-        {
-            "phone_number": "09123456789"
-        }
-
-    Response (JSON, status 201):
-        {
-            "code": "348912"
-        }
-
-    Validation:
-        - The phone number must start with "09"
-        - Only numeric characters are allowed
-    
-
-    Errors:
-        - 400 Bad Request if the serializer validation fails
-        - 429 Too Many Requests if throttling limit is exceeded
-    
-    
-    
-    """
     permission_classes = [AllowAny]
     throttle_classes = [AnonRateThrottle , UserRateThrottle]
+    @swagger_auto_schema(
+            operation_summary = "ارسال کد یک بار مصرف به کاربر.",
+            operation_description=
+            """
+            با ارسال شماره تلفن کد یکبار مصرف ساخته شده و به کاربر ارسال میشود.
+
+            تعداد دفعات دریافت کد برای هر کاربر : ۱۰
+            زمان منقضی شدن کد : ۲ دقیقه
+
+            اعتبار سنجی :
+            -شماره باید با ۰۹ شروع شود.
+            -تعداد ارقام باید ۱۱ رقم باشد.
+
+            """,
+            responses={
+
+            201: openapi.Response(
+                description="OTP created",
+                schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                'code': openapi.Schema(type=openapi.TYPE_STRING , example="348912")
+                    }
+                ),
+            ),
+            400: "Bad Request",
+            429: "Too Many Requests"
+
+            },
+            request_body=SendOTPCodeSerializers
+    )
 
     def post(self , request) :
         serializer_data = SendOTPCodeSerializers(data=request.data)
@@ -63,36 +65,42 @@ class SendOTPCodeAPIView(APIView):
                
 
 class VerifyOTPCodeAPIView(APIView):
-    """
-    API endpoint for verifying a One-Time Password (OTP) code sent to a user's phone number.
-
-    This view accepts a POST request with a phone number and an OTP code. It validates
-    the OTP code against the latest code stored in the database for that phone number.
-    If the code is correct and not expired, it confirms successful verification and deletes
-    the OTP record.
-
-    Throttling:
-        - Anonymous users: limited to 5 requests per day
-        - Authenticated users: limited to 5 requests per day
-
-    Request body (JSON):
-        {
-            "phone_number": "09123456789",
-            "code": "348912"
-        }
-
-    Response (JSON, status 200):
-        {
-            "message": "کد صحیح است! ورود موفق."
-        }
-
-    Validation and errors:
-        - 400 Bad Request if the serializer validation fails (wrong code, expired, or invalid phone number)
-        - 404 Not Found if the phone number does not exist
-        - 429 Too Many Requests if throttling limit is exceeded
-    """
+ 
     throttle_classes = [AnonRateThrottle , UserRateThrottle]
     permission_classes = [AllowAny]
+    @swagger_auto_schema(
+            operation_summary="اعتبار سنجی کد یکبار مصرف برای ورود یا ثبت نام",
+            operation_description="""
+            این ویو مقدار کد ارسال شده و شماره تلفن را میگیرید و در صورت درست بودن کد به کاربر پاسخ درست را میدهد.
+            در صورتی که کد درست بوده باشد کاربر ورود یا وارد مرحله ثبت نام شده و درنهایت کد یکبار مصرف آن در دیتابیس حذف میشود.
+
+
+            اگر کاربر ثبت شده/لاگین شده باشد :
+            {
+                "is_registered": true,
+                "access": "...",
+                "refresh": "..."
+            }
+           
+           
+            اگر کاربر  تازه وارد باشد :
+            {
+                "is_registered": false,
+                "message": "لطفا اطلاعاتتان را پر کنید",
+                "phone_number": "..."
+            }
+            و به صفحه رجیستر منتقل میشود جهت ثبت نهایی نام و شماره تلفن و دیگر اطلاعات کاربر در دیتابیس.
+
+            """,
+            request_body=VerifyOTPCodeSerializers,
+            responses={
+            200: "Verify OTP result",
+            400: "Bad Request",
+            },
+
+    )
+    
+
     def post(self, request):
         serializer_data = VerifyOTPCodeSerializers(data=request.data)
         serializer_data.is_valid(raise_exception=True)
@@ -119,68 +127,36 @@ class VerifyOTPCodeAPIView(APIView):
 
 
 class UserRegisterAPIView(mixins.CreateModelMixin , generics.GenericAPIView):
-    """
-    API view for registering a new user and returning JWT tokens.
 
-    This view allows clients to create a new user account by sending a POST request
-    with the required user data. Upon successful registration, it returns the user
-    data along with access and refresh tokens for authentication.
-
-    Attributes:
-        serializer_class (UserRegisterSerializers): 
-            The serializer class used to validate input data and create the user.
-
-    Methods:
-        post(request, *args, **kwargs):
-            Handles POST requests to register a new user.
-
-            Steps performed:
-            1. Instantiate the serializer with request data.
-            2. Validate the input data. If invalid, raises an exception and returns errors.
-            3. Save the validated data to create a new User instance.
-            4. Generate JWT refresh and access tokens for the new user.
-            5. Add the tokens to the serialized user data under the "Token" key.
-            6. Return a Response containing the user data and tokens with HTTP 201 status.
-
-    Request Body:
-        The request must include all required fields defined in UserRegisterSerializers,
-        for example:
-        {
-            "full_name": "Elmira",
-            "phone_number": "09123456789",
-            "national_code": "2345678910",
-            "birthday_date": "2025-08-05",
-            "password": "Elmira123@",
-            "address": "Tehran",
-            "latitude": "11.000000",
-            "longitude": "789.000000",
-
-        }
-
-    Response:
-        On success (HTTP 201):
-        {
-            "full_name": "Elmira",
-            "phone_number": "09123456789",
-            "national_code": "2345678910",
-            "birthday_date": "2025-08-05",
-            ...
-            "Token": {
-                "login": False,
-                "refresh": "<refresh_token_here>",
-                "access": "<access_token_here>"
-            }
-        }
-
-        On validation error (HTTP 400):
-        {
-            "phone_number": ["شماره تلفن باید فقط شامل ۱۱ رقم باشد."],
-            "national_code": ["کد ملی باید ۱۰ رقم باشد."],
-            ...
-        }
-    """
     permission_classes = [AllowAny]
     serializer_class = UserRegisterSerializers
+    @swagger_auto_schema(
+            operation_summary="فرم ثبت نام کاربر",
+            operation_description="""
+              API ثبت‌نام کاربر جدید.
+
+            این ویو اطلاعات کاربر را می‌گیرد، صحت آن‌ها را بررسی می‌کند و در صورت صحیح بودن، 
+            یک حساب کاربری ایجاد می‌کند. سپس توکن‌های JWT (رفرش و اکسس) را در پاسخ برمی‌گرداند.
+
+            اعتبارسنجی‌های مهم:
+            - شماره تلفن باید 11 رقم و با «09» شروع شود.
+            - کد ملی باید 10 رقم باشد.
+            - رمز عبور باید شامل حروف کوچک، بزرگ و کاراکتر خاص باشد.
+            - تاریخ تولد باید فرمت صحیح داشته باشد.
+            - مختصات جغرافیایی (latitude و longitude) باید مقدار معتبر عددی باشند.
+
+
+            """,
+            request_body=UserRegisterSerializers,
+            responses={
+                201:"The User Created",
+                400: "Bad Request",
+
+            }
+
+
+
+    )
     def post(self, request, *args, **kwargs):
             
             seri = self.serializer_class(data = request.data)
@@ -190,7 +166,7 @@ class UserRegisterAPIView(mixins.CreateModelMixin , generics.GenericAPIView):
             serializer_data = seri.data
 
             serializer_data["token"] = {
-                "is_registered":False,
+                "is_registered":True,
                 "refresh":str(refresh),
                 "access":str(refresh.access_token)
             }
@@ -199,30 +175,6 @@ class UserRegisterAPIView(mixins.CreateModelMixin , generics.GenericAPIView):
 
 
 class UserProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
-    """
-    API view for retrieving and updating the authenticated user's profile.
-
-    Permissions:
-        - Only authenticated users can access this view.
-
-    Methods:
-        GET:
-            - Retrieve the current authenticated user's profile.
-            - Returns all fields of the user.
-
-        PUT / PATCH:
-            - Update the current authenticated user's profile.
-            - `partial=True` allows partial updates (PATCH), but validation
-              is still applied to provided fields.
-            - If any field violates serializer validation rules (e.g., required
-              fields are empty, phone number format invalid), a 400 response
-              with details is returned.
-
-    Usage:
-        - The view automatically uses `request.user` as the object to update.
-        - No need to provide a user ID in the URL; each user can only update
-          their own profile.
-    """
 
     serializer_class = UserRegisterSerializers
     permission_classes = [IsAuthenticated]
@@ -230,6 +182,45 @@ class UserProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         # فقط کاربر خودش
         return self.request.user
+    
+    @swagger_auto_schema(
+        operation_summary="ویرایش پروفایل کاربر",
+        operation_description="""
+        این متد پروفایل کاربر لاگین‌شده را ویرایش می‌کند.
+        
+        - فقط فیلدهایی که ارسال می‌کنید آپدیت می‌شوند.
+        - اگر بخشی نامعتبر باشد، پیام خطا و دلیل آن برمی‌گردد.
+        - کاربر فقط می‌تواند اطلاعات خودش را ویرایش کند.
+        """,
+        request_body=UserRegisterSerializers,
+        responses={
+            200: "Profile updated successfully",
+            400: "Validation Error",
+            401: "Unauthorized",
+           
+        }
+    )
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
+    @swagger_auto_schema(
+            
+        operation_summary="نمایش پروفایل کاربر",
+        operation_description="پروفایل کاربر لاگین شده را برمیگرداند تا کاربر اطلاعات خود را ببیند.",
+        responses = {
+            200:"Ok",
+            401: "Unauthorized",
+
+        }
+
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+    
+    @swagger_auto_schema(auto_schema=None)
+    def put(self, request, *args, **kwargs):
+        return super().put(request, *args, **kwargs)
+    
+
     def update(self, request, *args, **kwargs):
 
         user = self.get_object()

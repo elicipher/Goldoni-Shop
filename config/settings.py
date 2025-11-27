@@ -195,4 +195,5 @@ SWAGGER_SETTINGS = {
         }
     },
     'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_yasg.inspectors.SwaggerAutoSchema',
+    'DOC_EXPANSION': 'none',   # همه رو از اول ببند
 }
