@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator ,MaxValueValidator
 from accounts.models import User
 from PIL import Image
 from django.db.models import Avg
+from django.core.exceptions import ValidationError
 
 
 # Create your models here.
@@ -133,3 +134,13 @@ class CommentLike(models.Model):
 
     class Meta:
         unique_together = ("user","comment")
+
+
+class SlideImage(models.Model):
+    image = models.ImageField(upload_to="Slide/")
+    def clean(self):
+        if not self.pk and SlideImage.objects.count() >= 6:
+            raise ValidationError("حداکثر ۶ عکس برای اسلاید مجاز است.")
+    class Meta:
+        verbose_name = "Slide Image"
+        verbose_name_plural = "Slide Images"
