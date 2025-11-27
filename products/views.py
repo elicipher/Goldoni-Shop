@@ -1,8 +1,8 @@
 from rest_framework.views import APIView 
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import ProductSerializers , CategorySerializers , ProductRetrieveSerializers , LikeAndDislikeSerializers
-from .models import Product , Category , ProductLike , CommentLike , Comment
+from .serializers import ProductSerializers , CategorySerializers , ProductRetrieveSerializers , LikeAndDislikeSerializers , SlideImageSerializers
+from .models import Product , Category , ProductLike , CommentLike , Comment  , SlideImage
 from django.db.models import Avg, Q 
 from rest_framework.generics import ListAPIView , RetrieveAPIView 
 from rest_framework.permissions import IsAuthenticated
@@ -38,6 +38,16 @@ class ProductRetrieveApiView(RetrieveAPIView):
 
 
 # region  Lists
+class SlideImageApiView(ListAPIView):
+    serializer_class=SlideImageSerializers
+    queryset = SlideImage.objects.all()
+
+    @swagger_auto_schema(tags=["home views"], operation_summary="تصاویر اسلاید" , operation_description="تصاویر اسلاید را به شکل لیست برمیگرداند.")
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    
+
 class ProductListIndexApiView(APIView):
     """
     Retrieve categorized product lists for the homepage.
