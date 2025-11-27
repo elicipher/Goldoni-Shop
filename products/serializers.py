@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import *
 from accounts.models import User
 
+
 class CategorySerializers(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -73,3 +74,7 @@ class ProductRetrieveSerializers(serializers.ModelSerializer):
 class LikeAndDislikeSerializers(serializers.Serializer):
     is_like = serializers.BooleanField()
 
+class SlideImageSerializers(serializers.ModelSerializer):
+    class Meta:
+        model= SlideImage
+        fields = "__all__"

@@ -12,4 +12,5 @@ urlpatterns = [
     path("profile/" , views.UserProfileUpdateAPIView.as_view() ),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path("api/check/access_token/",views.CheckAccessTokenApiView.as_view(), name="token_access")
 ]
