@@ -231,7 +231,21 @@ class UserProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
 
                     
                 
-            
+class CheckAccessTokenApiView(APIView):
+    permission_classes = [IsAuthenticated]
+    @swagger_auto_schema(
+            tags=["account"],
+            operation_summary="بررسی اکسس توکن",
+            operation_description="این ویو بررسی میکند که اکسس توکن منقضی شده است یا خیر اگر پاسخ ولید بود یعنی توکن هنوز سالم است و منقضی نشده است.",
+            responses={
+                200:"The Token is Valid",
+                401:"The Token is expired",
+            }
+    )
+    def get(self , request):
+        return Response({"valid":True},status=status.HTTP_200_OK)
+
+
 
 
             
