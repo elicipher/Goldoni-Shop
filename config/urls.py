@@ -22,43 +22,10 @@ from django.conf.urls.static import static
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-<<<<<<< HEAD
 from drf_yasg.generators import OpenAPISchemaGenerator
-
-class CustomOpenAPISchemaGenerator(OpenAPISchemaGenerator):
-  def get_schema(self, request=None, public=False):
-    """Generate a :class:`.Swagger` object with custom tags"""
-
-    swagger = super().get_schema(request, public)
-    swagger.tags = [
-        {
-            "name": "api",
-            "description": "everything about your API"
-        },
-        {
-            "name": "users",
-            "description": "everything about your users"
-        },
-    ]
-
-    return swagger
-=======
-
->>>>>>> edb947b97584b34cbe74bc837c3a16415359efa5
-
-
 
 schema_view = get_schema_view(
    openapi.Info(
-<<<<<<< HEAD
-      title="Goldoni API",
-      default_version='v1',
-      description="يک ای پی آی مخصوص اپلیکیشن فروشگاهی شما",
-   ),
-   public=True,
-   permission_classes=(permissions.AllowAny,),
-   generator_class= None
-=======
       title="Snippets API",
       default_version='v1',
       description="Test description",
@@ -68,7 +35,6 @@ schema_view = get_schema_view(
    ),
    public=True,
    permission_classes=(permissions.AllowAny,),
->>>>>>> edb947b97584b34cbe74bc837c3a16415359efa5
 )
 
 
@@ -83,11 +49,9 @@ urlpatterns = [
     # Optional UI:
     # path('', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
    path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-<<<<<<< HEAD
    path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-=======
+
    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
->>>>>>> edb947b97584b34cbe74bc837c3a16415359efa5
    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
     # path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),

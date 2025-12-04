@@ -46,16 +46,18 @@ INSTALLED_APPS = [
     #third-party apps
     'rest_framework',
     'django_jalali',
+    "corsheaders",
     # 'drf_spectacular',
     'drf_yasg',
-<<<<<<< HEAD
-=======
+
     'django_extensions',
->>>>>>> edb947b97584b34cbe74bc837c3a16415359efa5
+
 
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -63,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -187,28 +190,23 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-
 SWAGGER_SETTINGS = {
-<<<<<<< HEAD
-=======
-    'USE_SESSION_AUTH': False,
->>>>>>> edb947b97584b34cbe74bc837c3a16415359efa5
+    'USE_SESSION_AUTH': False,  # اگه با JWT کار می‌کنی اینو False بزار
     'SECURITY_DEFINITIONS': {
         'Bearer': {
             'type': 'apiKey',
             'name': 'Authorization',
-<<<<<<< HEAD
             'in': 'header',
             'description': 'JWT Authorization header using the Bearer scheme. Example: "Bearer <token>"'
         }
     },
-    'USE_SESSION_AUTH': False,  # اگه با JWT کار می‌کنی اینو False بزار
     'DEFAULT_MODEL_RENDERING': 'example',
-=======
-            'in': 'header'
-        }
-    },
     'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_yasg.inspectors.SwaggerAutoSchema',
-    'DOC_EXPANSION': 'none',   # همه رو از اول ببند
->>>>>>> edb947b97584b34cbe74bc837c3a16415359efa5
+    'DOC_EXPANSION': 'none',   # همه endpoint ها از اول بسته باشن
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "Goldonisite12.pythonanywhere.com"
+]
+
+CORS_ALLOW_ALL_ORIGINS = True  # برای تست

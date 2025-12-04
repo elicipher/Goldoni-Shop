@@ -5,50 +5,18 @@ from .serializers import (
     SendOTPCodeSerializers ,
     VerifyOTPCodeSerializers,
     UserRegisterSerializers
-    )
+    ) 
 from .models import OTPCode , User
-# from rest_framework.throttling import AnonRateThrottle , UserRateThrottle
+from rest_framework.throttling import AnonRateThrottle , UserRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated , AllowAny
-<<<<<<< HEAD
-from drf_yasg.utils import swagger_auto_schema
-=======
 from drf_yasg.utils import swagger_auto_schema 
 from drf_yasg import openapi
->>>>>>> edb947b97584b34cbe74bc837c3a16415359efa5
 
 # Create your views here.
 
 class SendOTPCodeAPIView(APIView):
 
-<<<<<<< HEAD
-    This view accepts a POST request with a phone number, generates a new OTP code,
-    and returns it in the response. If there is already an existing OTP for the
-    same phone number, it will be deleted before generating a new one.
-
-    Throttling:
-        - Anonymous users: limited to 10 requests per hour
-        - Authenticated users: limited to 10 requests per hour
-
-    Request body (JSON):
-        {
-            "phone_number": "09123456789"
-        }
-
-    Response (JSON, status 201):
-        {
-            "code": "348912"
-        }
-
-    Validation:
-        - The phone number must start with "09"
-        - Only numeric characters are allowed
-
-
-    Errors:
-        - 400 Bad Request if the serializer validation fails
-        - 429 Too Many Requests if throttling limit is exceeded
-=======
     permission_classes = [AllowAny]
     throttle_classes = [AnonRateThrottle , UserRateThrottle]
     @swagger_auto_schema(
@@ -82,19 +50,7 @@ class SendOTPCodeAPIView(APIView):
             },
             request_body=SendOTPCodeSerializers
     )
->>>>>>> edb947b97584b34cbe74bc837c3a16415359efa5
 
-
-
-    """
-
-    # throttle_classes = [AnonRateThrottle , UserRateThrottle]
-
-    @swagger_auto_schema(
-        tags=['Auth Api'],
-        request_body=SendOTPCodeSerializers,
-        operation_description="ارسال شماره تلفن برای دریافت کد OTP جدید"
-    )
     def post(self , request) :
         serializer_data = SendOTPCodeSerializers(data=request.data)
         if serializer_data.is_valid():
@@ -102,50 +58,13 @@ class SendOTPCodeAPIView(APIView):
             OTPCode.objects.filter(phone_number = phone_number).delete()
             otp_code = OTPCode.objects.create(phone_number = phone_number)
             code = otp_code.generate_otp()
-            return Response({"code" : code , "phone":phone_number} , status=status.HTTP_201_CREATED)
+            return Response({"code" : code} , status=status.HTTP_201_CREATED)
 
         return Response(serializer_data.errors , status=status.HTTP_400_BAD_REQUEST)
 
-
+               
 
 class VerifyOTPCodeAPIView(APIView):
-<<<<<<< HEAD
-    """
-    API endpoint for verifying a One-Time Password (OTP) code sent to a user's phone number.
-
-    This view accepts a POST request with a phone number and an OTP code. It validates
-    the OTP code against the latest code stored in the database for that phone number.
-    If the code is correct and not expired, it confirms successful verification and deletes
-    the OTP record.
-
-    Throttling:
-        - Anonymous users: limited to 5 requests per day
-        - Authenticated users: limited to 5 requests per day
-
-    Request body (JSON):
-        {
-            "phone_number": "09123456789",
-            "code": "348912"
-        }
-
-    Response (JSON, status 200):
-        {
-            "message": "کد صحیح است! ورود موفق."
-        }
-
-    Validation and errors:
-        - 400 Bad Request if the serializer validation fails (wrong code, expired, or invalid phone number)
-        - 404 Not Found if the phone number does not exist
-        - 429 Too Many Requests if throttling limit is exceeded
-    """
-    # throttle_classes = [AnonRateThrottle , UserRateThrottle]
-    permission_classes = [AllowAny]
-    @swagger_auto_schema(
-        tags=['Auth Api'],
-        request_body=VerifyOTPCodeSerializers,
-        operation_description = "200 کدی که تو صفحه SendOTPCodeAPIView دادی رو اینجا میفرستی به همراه کدی که برات ارسال شد اگه شماره اشتباه بدی نمیتونی ورود کنی "
-    )
-=======
  
     throttle_classes = [AnonRateThrottle , UserRateThrottle]
     permission_classes = [AllowAny]
@@ -181,7 +100,6 @@ class VerifyOTPCodeAPIView(APIView):
 
     )
     
->>>>>>> edb947b97584b34cbe74bc837c3a16415359efa5
 
     def post(self, request):
         serializer_data = VerifyOTPCodeSerializers(data=request.data)
@@ -197,34 +115,19 @@ class VerifyOTPCodeAPIView(APIView):
                 "access" : str(refresh.access_token),
                 "refresh":str(refresh),
             }, status=status.HTTP_200_OK)
-
+        
         else :
             return Response({
                 "is_registered":False,
                 "message":"لطفا اطلاعاتتان را پر کنید",
                 "phone_number" : phone_number
             }, status=status.HTTP_200_OK)
-
-
+                
+            
 
 
 class UserRegisterAPIView(mixins.CreateModelMixin , generics.GenericAPIView):
 
-<<<<<<< HEAD
-    This view allows clients to create a new user account by sending a POST request
-    with the required user data. Upon successful registration, it returns the user
-    data along with access and refresh tokens for authentication.
-
-    """
-    serializer_class = UserRegisterSerializers
-
-    permission_classes = [AllowAny]
-    @swagger_auto_schema(
-        tags=['Auth Api'],
-        request_body=UserRegisterSerializers,
-    )
-
-=======
     permission_classes = [AllowAny]
     serializer_class = UserRegisterSerializers
     @swagger_auto_schema(
@@ -254,9 +157,8 @@ class UserRegisterAPIView(mixins.CreateModelMixin , generics.GenericAPIView):
 
 
     )
->>>>>>> edb947b97584b34cbe74bc837c3a16415359efa5
     def post(self, request, *args, **kwargs):
-
+            
             seri = self.serializer_class(data = request.data)
             seri.is_valid(raise_exception=True)
             user = seri.save()
@@ -273,19 +175,10 @@ class UserRegisterAPIView(mixins.CreateModelMixin , generics.GenericAPIView):
 
 
 class UserProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
-<<<<<<< HEAD
-    """
-    API view for retrieving and updating the authenticated user's profile.
-
-    """
-=======
->>>>>>> edb947b97584b34cbe74bc837c3a16415359efa5
 
     serializer_class = UserRegisterSerializers
     permission_classes = [IsAuthenticated]
-    @swagger_auto_schema(
-        tags=['Auth Api'],
-    )
+
     def get_object(self):
         # فقط کاربر خودش
         return self.request.user
@@ -336,8 +229,6 @@ class UserProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
         serializer.save()
         return Response(serializer.data , status= status.HTTP_200_OK)
 
-<<<<<<< HEAD
-=======
                     
                 
 class CheckAccessTokenApiView(APIView):
@@ -355,14 +246,10 @@ class CheckAccessTokenApiView(APIView):
         return Response({"valid":True},status=status.HTTP_200_OK)
 
 
->>>>>>> edb947b97584b34cbe74bc837c3a16415359efa5
 
 
+            
 
 
-
-
-
-
-
+        
 
