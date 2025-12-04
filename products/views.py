@@ -1,7 +1,12 @@
 from rest_framework.views import APIView 
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import ProductSerializers , CategorySerializers , ProductRetrieveSerializers , LikeAndDislikeSerializers , SlideImageSerializers
+from .serializers import (ProductSerializers , 
+                          CategorySerializers , 
+                          ProductRetrieveSerializers , 
+                          LikeAndDislikeSerializers , 
+                          SlideImageSerializers,
+                          ProductLikeSerializers )
 from .models import Product , Category , ProductLike , CommentLike , Comment  , SlideImage
 from django.db.models import Avg, Q 
 from rest_framework.generics import ListAPIView , RetrieveAPIView 
@@ -433,5 +438,10 @@ class LikeProductApiView(APIView):
 
         return Response({"liked": True}, status=status.HTTP_200_OK)
 
+class ListProductLikedGenericView(ListAPIView):
+    permission_classes = [IsAuthenticated,]
+    serializer_class = ProductLikeSerializers
+    def get_queryset(self):
+        return ProductLike.objects.filter(user=self.request.user)
 
 # endregion

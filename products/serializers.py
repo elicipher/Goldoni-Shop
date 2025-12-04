@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category ,  Product , Comment ,SlideImage, ProductImage
+from .models import Category ,  Product , Comment ,SlideImage, ProductImage , ProductLike
 from accounts.models import User
 
 
@@ -84,4 +84,11 @@ class LikeAndDislikeSerializers(serializers.Serializer):
 class SlideImageSerializers(serializers.ModelSerializer):
     class Meta:
         model= SlideImage
+        fields = "__all__"
+
+
+class ProductLikeSerializers(serializers.ModelSerializer):
+    product = ProductSerializers()
+    class Meta:
+        model=ProductLike
         fields = "__all__"
