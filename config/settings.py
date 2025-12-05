@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'iranian_cities',
     'django_extensions',
+    'rest_framework_simplejwt.token_blacklist'
 
 
 ]

@@ -62,6 +62,13 @@ class UserRegisterSerializers(serializers.ModelSerializer):
         model = User
         exclude = ("is_active","is_admin","is_superuser",)
 
+    def create(self, validated_data):
+        password = validated_data.pop("password")
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+        return super().create(validated_data)
+
     def validate_phone_number(self, value ):
         if not value.isdigit() or len(value) != 11:
             raise serializers.ValidationError("شماره تلفن باید فقط شامل ۱۱ رقم باشد.")
