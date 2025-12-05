@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import OTPCode , User 
+from .models import OTPCode , User , Address
 
 
 
@@ -75,6 +75,12 @@ class UserRegisterSerializers(serializers.ModelSerializer):
         return value
     
  
+
+class AddressSerializers(serializers.ModelSerializer):
+
+    class Meta:
+        model = Address
+        fields = "__all__"
 
     
 

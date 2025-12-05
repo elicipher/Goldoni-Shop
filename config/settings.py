@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     "corsheaders",
     # 'drf_spectacular',
     'drf_yasg',
-
+    'iranian_cities',
     'django_extensions',
 
 
@@ -210,3 +210,7 @@ SWAGGER_SETTINGS = {
 # ]
 
 CORS_ALLOW_ALL_ORIGINS = True  # برای تست
+IRANIAN_CITIES_ADMIN_ADD_READONLY_ENABLED = True
+IRANIAN_CITIES_ADMIN_DELETE_READONLY_ENABLED = True
+IRANIAN_CITIES_ADMIN_CHANGE_READONLY_ENABLED = True
+IRANIAN_CITIES_ADMIN_INLINE_ENABLED = False

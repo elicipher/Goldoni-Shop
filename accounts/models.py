@@ -4,6 +4,7 @@ from .managers import UserManager
 from django.utils import timezone
 from datetime import timedelta
 import random
+from iranian_cities.fields import ProvinceField , CityField 
 # Create your models here.
 
 class User(AbstractBaseUser):
@@ -71,4 +72,19 @@ class OTPCode(models.Model):
         self.save()
         return self.code
 
+
+class Address(models.Model):
+
+    user = models.ForeignKey(User , on_delete=models.CASCADE , related_name="addresses",verbose_name="کاربر")
+    province = ProvinceField(verbose_name="استان")
+    city = CityField(verbose_name="شهر")
+    postal_code = models.CharField(max_length=10,blank=True,null=True,verbose_name="کد پستی" )
+    plaque = models.CharField( max_length=10,verbose_name="پلاک")
+    address = models.CharField(max_length=500 , verbose_name="آدرس کامل ")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.full_name} - {self.province} - {self.city} - {self.plaque}"
 

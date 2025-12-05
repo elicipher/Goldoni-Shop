@@ -1,12 +1,14 @@
-from rest_framework.views import APIView
+from rest_framework.views import APIView 
+from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status , generics , mixins
 from .serializers import (
     SendOTPCodeSerializers ,
     VerifyOTPCodeSerializers,
-    UserRegisterSerializers
+    UserRegisterSerializers,
+    AddressSerializers,
     ) 
-from .models import OTPCode , User
+from .models import OTPCode , User , Address
 from rest_framework.throttling import AnonRateThrottle , UserRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated , AllowAny
@@ -246,7 +248,14 @@ class CheckAccessTokenApiView(APIView):
         return Response({"valid":True},status=status.HTTP_200_OK)
 
 
+class MyAddressesGenericView(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AddressSerializers
 
+    def get_queryset(self):
+        return Address.objects.filter(user=self.request.user)
+
+    
 
             
 
