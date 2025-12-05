@@ -13,7 +13,9 @@ urlpatterns = [
     path("verify_otp_code/" , views.VerifyOTPCodeAPIView.as_view() ),
     path("register/" , views.UserRegisterAPIView.as_view() ),
     path("profile/" , views.UserProfileUpdateAPIView.as_view() ),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    # path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path("api/check/access_token/",views.CheckAccessTokenApiView.as_view(), name="token_access")
+    path("api/check/access_token/",views.CheckAccessTokenApiView.as_view(), name="token_access"),
+    path("logout/",views.LogOutAPIView.as_view(),name="logout")
+    
 ]+ router.urls

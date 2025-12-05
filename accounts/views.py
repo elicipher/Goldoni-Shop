@@ -14,6 +14,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated , AllowAny
 from drf_yasg.utils import swagger_auto_schema 
 from drf_yasg import openapi
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+from django.utils import timezone
+from rest_framework_simplejwt.exceptions import TokenError
 
 # Create your views here.
 
@@ -259,6 +262,28 @@ class MyAddressesGenericView(viewsets.ModelViewSet):
 
             
 
-
+class LogOutAPIView(APIView):
+    def post(self, request):
         
+        refresh_token = request.data.get("refresh")
+        if not refresh_token:
+            return Response(
+                {"refresh": "لطفا توکن رفرش را ارسال کنید"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            BlacklistedToken.objects.filter(token__expires_at__lt=timezone.now()).delete()
+            OutstandingToken.objects.filter(expires_at__lt=timezone.now()).delete()
 
+        except TokenError:
+            return Response(
+                {"refresh": "توکن نامعتبر است"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return Response(
+                    {"refresh": "شما با موفقیت از حساب کاربری خود خارج شدید"},
+                    status=status.HTTP_205_RESET_CONTENT
+            )
