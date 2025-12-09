@@ -44,10 +44,11 @@ class ProductRetrieveApiView(RetrieveAPIView):
 
 # region  Lists
 class SlideImageApiView(ListAPIView):
+    pagination_class = None
     serializer_class=SlideImageSerializers
     queryset = SlideImage.objects.all()
 
-    @swagger_auto_schema(tags=["home views"], operation_summary="تصاویر اسلاید" , operation_description="تصاویر اسلاید را به شکل لیست برمیگرداند.")
+    @swagger_auto_schema(tags=["home views"], operation_summary= "تصاویر اسلاید بالا" , operation_description="تصاویر اسلاید را به شکل لیست برمیگرداند.")
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -439,9 +440,19 @@ class LikeProductApiView(APIView):
         return Response({"liked": True}, status=status.HTTP_200_OK)
 
 class ListProductLikedGenericView(ListAPIView):
+
     permission_classes = [IsAuthenticated,]
     serializer_class = ProductLikeSerializers
     def get_queryset(self):
         return ProductLike.objects.filter(user=self.request.user)
+    @swagger_auto_schema(
+            operation_summary="لیست محصولات موردعلاقه",
+            tags=["Profile Screen"],
+            
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 # endregion
+
+

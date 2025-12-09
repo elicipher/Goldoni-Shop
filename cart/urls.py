@@ -8,5 +8,8 @@ urlpatterns = [
     path('list_items/',views.CartItemListView.as_view()),
     path('order/',views.OrderCreateView.as_view()),
     path('order/shipping/',views.OrderListshippingView.as_view()),
+    path('order/delivered/',views.OrderListDeliveredView.as_view()),
+    path('order/returned/',views.OrderListReturnedView.as_view()),
+    path('order/all/',views.OrderListView.as_view()),
     path('order/retrieve/<uuid:order_id>/',views.OrderItemRetrieveView.as_view()),
 ]
