@@ -18,5 +18,7 @@ urlpatterns = [
     path("like/<int:product_id>/" , views.LikeProductApiView.as_view()),
     path("comment/<int:comment_id>/like/" , views.LikeAndDislikeCommentAPIView.as_view()),
     path("favorite_list/" , views.ListProductLikedGenericView.as_view()),    
+    path("search/",views.ProductSearchView.as_view()),
+    path("search_category/",views.CategorySearchView.as_view()),
 ]
 

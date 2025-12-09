@@ -13,6 +13,8 @@ from rest_framework.generics import ListAPIView , RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.db.models import Q
+
 
 # Create your views here.
 
@@ -456,3 +458,42 @@ class ListProductLikedGenericView(ListAPIView):
 # endregion
 
 
+class ProductSearchView(ListAPIView):
+    serializer_class = ProductSerializers
+
+    def get_queryset(self):
+        q = self.request.query_params.get("q", "")
+        return Product.objects.filter(Q(title__icontains=q) | Q(category__title__icontains=q))
+        
+    @swagger_auto_schema(tags=["search"],
+                         operation_summary="جستجوی محصول",
+                         operation_description="""
+                        این ویو امکان جستجوی محصول را بر اساس نام محصول یا نام دسته بندی فراهم میکند.
+                        کوئری باید با پارامتر q ارسال شود.
+                        در صورت نبودن مقدار نال میفرستد
+                            - توکن :‌نیاز ندارد.
+                         """,
+                         responses={200:ProductSerializers(many=True)})
+    
+                         
+    
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
+class CategorySearchView(ListAPIView):
+    serializer_class = CategorySerializers
+
+    def get_queryset(self):
+        q = self.request.query_params.get("q", "")
+        return Category.objects.filter(title__icontains=q)
+    @swagger_auto_schema(tags=["search"],
+                         operation_summary="جستجوی دسته بندی",
+                         operation_description="""
+                        این ویو امکان جستجوی دسته بندی را بر اساس نام دسته بندی فراهم میکند.پارامتر q باید با کوئری ارسال شود.
+                            - توکن :‌نیاز ندارد.
+                         """,
+                        responses={200:CategorySerializers(many=True)})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+    
