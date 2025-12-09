@@ -183,7 +183,7 @@ class CartItemListView(ListAPIView):
             """
             ,
             responses={
-                200 :"OK"
+                200 :CartSerializers()
             }
             )
     def get(self, request, *args, **kwargs):
@@ -247,26 +247,78 @@ class OrderCreateView(APIView):
     
         return Response({"message": "سفارش شما ثبت شد", "order_id": order.id}, status=status.HTTP_201_CREATED)
 
-class OrderListshippingView(ListAPIView):
+#region lists
+class OrderListView(ListAPIView):
     permission_classes = [IsAuthenticated]
-
     serializer_class = OrderSerializers
     queryset = Order.objects.all()
-
+    
+    def get_queryset(self):
+        return Order.objects.filter( user = self.request.user)
+    
     @swagger_auto_schema(
-            tags=["order"] ,
-            operation_summary="لیست سفارشات",
+            tags=["Profile Screen"],
+            operation_summary="لیست سفارشات ",
             operation_description="این ویو لیست سفارشات کاربر را نمایش میدهد." \
             "- توکن : نیاز دارد",
-            
-
-                          )
+        )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
+        return super().get(request, *args, **kwargs) 
+    
+class OrderListshippingView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderSerializers
+    queryset = Order.objects.all()
+    
     def get_queryset(self):
         return Order.objects.filter(status  = "shipping" , user = self.request.user)
     
+    @swagger_auto_schema(
+            tags=["Profile Screen"],
+            operation_summary="لیست سفارشات جاری",
+            operation_description="این ویو لیست سفارشات جاری را کاربر را نمایش میدهد." \
+            "- توکن : نیاز دارد",
+        )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+class OrderListDeliveredView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderSerializers
+    queryset = Order.objects.all()
+
+    def get_queryset(self):
+        return Order.objects.filter(status  = 'delivered' , user = self.request.user)
+    
+    @swagger_auto_schema(
+            tags=["Profile Screen"],
+            operation_summary="لیست سفارشات تحویل داده شده",
+            operation_description="این ویو لیست سفارشات تحویل داده شده را کاربر را نمایش میدهد." \
+            "- توکن : نیاز دارد",
+        )
+
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+class OrderListReturnedView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderSerializers
+    queryset = Order.objects.all()
+    def get_queryset(self):
+        return Order.objects.filter(status  = 'returned', user = self.request.user)
+    
+    @swagger_auto_schema(
+            tags=["Profile Screen"],
+            operation_summary= "لیست سفارشات مرجوع شده",
+            operation_description="این ویو لیست سفارشات مرجوع شده کاربر را نمایش میدهد." \
+            "- توکن : نیاز دارد",
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+# endregion
+
+
 class OrderItemRetrieveView(RetrieveUpdateDestroyAPIView):
     serializer_class = OrderItemSerializers
     queryset = OrderItem.objects.all()

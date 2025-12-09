@@ -99,7 +99,7 @@ class VerifyOTPCodeAPIView(APIView):
             """,
             request_body=VerifyOTPCodeSerializers,
             responses={
-            200: "Verify OTP result",
+            200: VerifyOTPCodeSerializers(),
             400: "Bad Request",
             },
 
@@ -154,7 +154,7 @@ class UserRegisterAPIView(mixins.CreateModelMixin , generics.GenericAPIView):
             """,
             request_body=UserRegisterSerializers,
             responses={
-                201:"The User Created",
+                201:UserRegisterSerializers(),
                 400: "Bad Request",
 
             }
@@ -189,6 +189,7 @@ class UserProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
         return self.request.user
     
     @swagger_auto_schema(
+        tags=["Profile Screen"],
         operation_summary="ویرایش پروفایل کاربر",
         operation_description="""
         این متد پروفایل کاربر لاگین‌شده را ویرایش می‌کند.
@@ -199,7 +200,7 @@ class UserProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
         """,
         request_body=UserRegisterSerializers,
         responses={
-            200: "Profile updated successfully",
+            200: UserRegisterSerializers(),
             400: "Validation Error",
             401: "Unauthorized",
            
@@ -208,11 +209,11 @@ class UserProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
     @swagger_auto_schema(
-            
+        tags=["Profile Screen"],
         operation_summary="نمایش پروفایل کاربر",
         operation_description="پروفایل کاربر لاگین شده را برمیگرداند تا کاربر اطلاعات خود را ببیند.",
         responses = {
-            200:"Ok",
+            200:UserRegisterSerializers(),
             401: "Unauthorized",
 
         }
@@ -257,6 +258,44 @@ class MyAddressesGenericView(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Address.objects.filter(user=self.request.user)
+    
+    @swagger_auto_schema(
+            tags=["Profile Screen"],
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+    @swagger_auto_schema(
+            tags=["Profile Screen"]
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+    
+    @swagger_auto_schema(
+            tags=["Profile Screen"]
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+    
+    @swagger_auto_schema(
+            tags=["Profile Screen"]
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+    
+    @swagger_auto_schema(
+            tags=["Profile Screen"]
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+    @swagger_auto_schema(
+            tags=["Profile Screen"]
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+    
+    
+    
 
     
 
