@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import CartItem , Cart , Order , OrderItem
 from products.serializers import ProductSerializers
-
+from products.models import Product
 
 
  
@@ -19,8 +19,8 @@ class CartItemListSerializers(serializers.ModelSerializer):
     
     
 class CartItemCreateSerializer(serializers.ModelSerializer):
-    product = ProductSerializers()
-    total_price = serializers.SerializerMethodField()
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+
     class Meta:
         model = CartItem
         exclude = ("cart" , )
