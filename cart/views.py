@@ -81,7 +81,18 @@ class CartItemUpdateView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
 
     queryset = CartItem.objects.all()
-
+    def get_queryset(self):
+        """Return only the cart items that belong to the current user."""
+        return CartItem.objects.filter(cart__user=self.request.user.id)
+    
+    def get_serializer_class(self):
+        """
+        Use CartItemCreateSerializer for PATCH, PUT, DELETE operations.
+        Use CartItemListSerializers for GET operation.
+        """
+        if self.request.method in ['PATCH', 'DELETE', 'PUT']:
+            return CartItemCreateSerializer
+        return CartItemListSerializers
 
     @swagger_auto_schema(
             tags=["cart"],
@@ -129,18 +140,7 @@ class CartItemUpdateView(RetrieveUpdateDestroyAPIView):
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
 
-    def get_queryset(self):
-        """Return only the cart items that belong to the current user."""
-        return CartItem.objects.filter(cart__user=self.request.user)
-    
-    def get_serializer_class(self):
-        """
-        Use CartItemCreateSerializer for PATCH, PUT, DELETE operations.
-        Use CartItemListSerializers for GET operation.
-        """
-        if self.request.method in ['PATCH', 'DELETE', 'PUT']:
-            return CartItemCreateSerializer
-        return CartItemListSerializers
+
 
 
 class CartItemListView(ListAPIView):
@@ -254,7 +254,7 @@ class OrderListView(ListAPIView):
     queryset = Order.objects.all()
     
     def get_queryset(self):
-        return Order.objects.filter( user = self.request.user)
+        return Order.objects.filter( user = self.request.user.id)
     
     @swagger_auto_schema(
             tags=["Profile Screen"],
@@ -271,7 +271,7 @@ class OrderListshippingView(ListAPIView):
     queryset = Order.objects.all()
     
     def get_queryset(self):
-        return Order.objects.filter(status  = "shipping" , user = self.request.user)
+        return Order.objects.filter(status  = "shipping" , user = self.request.user.id)
     
     @swagger_auto_schema(
             tags=["Profile Screen"],
@@ -288,7 +288,7 @@ class OrderListDeliveredView(ListAPIView):
     queryset = Order.objects.all()
 
     def get_queryset(self):
-        return Order.objects.filter(status  = 'delivered' , user = self.request.user)
+        return Order.objects.filter(status  = 'delivered' , user = self.request.user.id)
     
     @swagger_auto_schema(
             tags=["Profile Screen"],
@@ -305,7 +305,7 @@ class OrderListReturnedView(ListAPIView):
     serializer_class = OrderSerializers
     queryset = Order.objects.all()
     def get_queryset(self):
-        return Order.objects.filter(status  = 'returned', user = self.request.user)
+        return Order.objects.filter(status  = 'returned', user = self.request.user.id)
     
     @swagger_auto_schema(
             tags=["Profile Screen"],
@@ -357,7 +357,7 @@ class OrderItemRetrieveView(RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         order_id = self.kwargs.get('order_id')
 
-        return OrderItem.objects.filter(order__user = self.request.user  , order__id = order_id)
+        return OrderItem.objects.filter(order__user = self.request.user.id  , order__id = order_id)
     
 
 
