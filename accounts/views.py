@@ -257,7 +257,7 @@ class MyAddressesGenericView(viewsets.ModelViewSet):
     serializer_class = AddressSerializers
 
     def get_queryset(self):
-        return Address.objects.filter(user=self.request.user)
+        return Address.objects.filter(user=self.request.user.id)
     
     @swagger_auto_schema(
             tags=["Profile Screen"],
