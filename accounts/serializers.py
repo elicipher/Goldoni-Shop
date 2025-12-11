@@ -67,7 +67,7 @@ class UserRegisterSerializers(serializers.ModelSerializer):
         user = User(**validated_data)
         user.set_password(password)
         user.save()
-        return super().create(validated_data)
+        return user
 
     def validate_phone_number(self, value ):
         if not value.isdigit() or len(value) != 11:
@@ -79,6 +79,9 @@ class UserRegisterSerializers(serializers.ModelSerializer):
     def validate_national_code(self, value):
         if len(value) != 10  or not value.isdigit() :
             raise serializers.ValidationError("کد ملی باید شامل ۱۰ رقم باشد")
+        if User.objects.filter(national_code = value).exists() :
+            raise serializers.ValidationError("کد ملی باید یکتا باشد")
+
         return value
     
  
