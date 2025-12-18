@@ -23,11 +23,15 @@ class CartItemCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CartItem
-        exclude = ("cart" , )
+        exclude = ("cart" ,"sum_of_price" )
 
     def get_total_price(self, obj):
         return obj.total_price()
-    
+
+class CartItemUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=CartItem
+        exclude = ("cart","product","sum_of_price",)
 
 class CartSerializers(serializers.ModelSerializer):
     total_price = serializers.SerializerMethodField()
