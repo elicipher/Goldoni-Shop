@@ -26,9 +26,11 @@ class CartItem(models.Model):
     cart = models.ForeignKey(Cart , on_delete= models.CASCADE ,related_name="items" )
     product = models.ForeignKey(Product , on_delete= models.CASCADE )
     quantity = models.PositiveSmallIntegerField(validators=[MinValueValidator(1) , MaxValueValidator(10)],default=1) 
+    sum_of_price = models.PositiveIntegerField()
+
 
     def total_price(self):
-        return self.product.final_price * self.quantity
+        return self.sum_of_price  * self.quantity
     
     def __str__(self):
         return f"{self.quantity} x {self.product.title}"

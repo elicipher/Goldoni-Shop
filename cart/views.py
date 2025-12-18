@@ -1,7 +1,12 @@
 from rest_framework.views import APIView 
 from rest_framework.generics import RetrieveUpdateDestroyAPIView , ListAPIView , CreateAPIView 
 from .models import Cart , CartItem , Order , OrderItem
-from .serializers import CartItemCreateSerializer , CartSerializers , CartItemListSerializers , OrderSerializers , OrderItemSerializers
+from .serializers import (CartItemCreateSerializer , 
+                          CartSerializers , 
+                          CartItemListSerializers , 
+                          OrderSerializers , 
+                          OrderItemSerializers,
+                          CartItemUpdateSerializer)
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
@@ -91,7 +96,7 @@ class CartItemUpdateView(RetrieveUpdateDestroyAPIView):
         Use CartItemListSerializers for GET operation.
         """
         if self.request.method in ['PATCH', 'DELETE', 'PUT']:
-            return CartItemCreateSerializer
+            return CartItemUpdateSerializer
         return CartItemListSerializers
 
     @swagger_auto_schema(
