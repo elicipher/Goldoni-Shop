@@ -1,15 +1,15 @@
-from rest_framework.views import APIView 
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import (ProductSerializers , 
-                          CategorySerializers , 
-                          ProductRetrieveSerializers , 
-                          LikeAndDislikeSerializers , 
+from .serializers import (ProductSerializers ,
+                          CategorySerializers ,
+                          ProductRetrieveSerializers ,
+                          LikeAndDislikeSerializers ,
                           SlideImageSerializers,
                           ProductLikeSerializers )
 from .models import Product , Category , ProductLike , CommentLike , Comment  , SlideImage
-from django.db.models import Avg, Q 
-from rest_framework.generics import ListAPIView , RetrieveAPIView 
+from django.db.models import Avg, Q
+from rest_framework.generics import ListAPIView , RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -54,7 +54,7 @@ class SlideImageApiView(ListAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-    
+
 
 class ProductListIndexApiView(APIView):
     """
@@ -69,7 +69,7 @@ class ProductListIndexApiView(APIView):
     Returns:
         Response: serialized data in JSON format with HTTP 200 status
     """
-    
+
     @swagger_auto_schema(
             tags=["home views"],
             operation_summary="نمایش محصولات در صفحه اول",
@@ -82,8 +82,8 @@ class ProductListIndexApiView(APIView):
             توکن :‌نیاز ندارد.
 
             """
-           
-     
+
+
     )
     def get(self , request):
 
@@ -94,7 +94,7 @@ class ProductListIndexApiView(APIView):
             "amazing_sale" : Product.objects.filter(discount__gt = 0)[:5],
             "top_products" : product.filter(average_stars = 5)[:5],
             "new_products" : Product.objects.order_by("-created_at")[:5],
-            
+
 
         }
         data_seria = {
@@ -102,7 +102,7 @@ class ProductListIndexApiView(APIView):
             "amazing_sale" : ProductSerializers(data["amazing_sale"] , many = True).data,
             "top_products" : ProductSerializers(data["top_products"] , many = True).data,
             "new_products" : ProductSerializers(data["new_products"] , many = True).data,
-            
+
         }
         return Response(data_seria , status= status.HTTP_200_OK)
 
@@ -124,8 +124,8 @@ class CategoryListApiView(ListAPIView):
             توکن :‌نیاز ندارد.
 
             """
-           
-     
+
+
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -145,7 +145,7 @@ class ProductListByCategoryApiView(ListAPIView):
     def get_queryset(self):
         category_id = self.kwargs["category_id"]
         return Product.objects.filter(category_id =  category_id)
-    
+
     @swagger_auto_schema(
             tags=["home views"],
             operation_summary="نمایش محصولات بر اساس دسته بندی",
@@ -187,7 +187,7 @@ class TopProductListApiView(ListAPIView):
     def get_queryset(self):
         product = Product.objects.annotate(average_stars=Avg("comments__stars", filter=Q(comments__status="approved")))
         return product.filter(average_stars = 5)
-    
+
     @swagger_auto_schema(
             tags=["home views"],
             operation_summary="لیست محصولات  برتر",
@@ -219,7 +219,7 @@ class NewProductListApiView(ListAPIView):
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
-    
+
 # endregion
 
 
@@ -286,7 +286,9 @@ class LikeAndDislikeCommentAPIView(APIView):
                 404:"Not found comment",
                 400:"Bad request",
 
-            }
+
+            },
+
     )
     def post(self, request, comment_id):
         try:
@@ -320,12 +322,12 @@ class LikeAndDislikeCommentAPIView(APIView):
 
         action = "liked" if like_obj.is_like else "disliked"
         return Response({"message": action}, status=status.HTTP_201_CREATED)
-    
+
 class LikeProductApiView(APIView):
     """
     API endpoint to like or unlike a product.
 
-    This view allows an authenticated user to like a product. 
+    This view allows an authenticated user to like a product.
     If the user has already liked the product, calling this endpoint again will remove the like.
 
     HTTP Method:
@@ -363,7 +365,7 @@ class LikeProductApiView(APIView):
     tags=["products"],
     operation_summary="لایک یا آنلایک محصول",
     operation_description="""
-این ویو برای لایک کردن محصول است. اگر کاربر قبلاً محصول را لایک کرده باشد، 
+این ویو برای لایک کردن محصول است. اگر کاربر قبلاً محصول را لایک کرده باشد،
 با صدا زدن دوباره این API، لایک حذف می‌شود.
 
 پارامترهای لازم:
@@ -450,7 +452,7 @@ class ListProductLikedGenericView(ListAPIView):
     @swagger_auto_schema(
             operation_summary="لیست محصولات موردعلاقه",
             tags=["Profile Screen"],
-            
+
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -464,7 +466,7 @@ class ProductSearchView(ListAPIView):
     def get_queryset(self):
         q = self.request.query_params.get("q", "")
         return Product.objects.filter(Q(title__icontains=q) | Q(category__title__icontains=q))
-        
+
     @swagger_auto_schema(tags=["search"],
                          operation_summary="جستجوی محصول",
                          operation_description="""
@@ -473,10 +475,14 @@ class ProductSearchView(ListAPIView):
                         در صورت نبودن مقدار نال میفرستد
                             - توکن :‌نیاز ندارد.
                          """,
-                         responses={200:ProductSerializers(many=True)})
-    
-                         
-    
+                         responses={200:ProductSerializers(many=True)},
+                        manual_parameters=[
+                            openapi.Parameter('q', openapi.IN_QUERY, description="جست و جوی محصول", type=openapi.TYPE_STRING),
+                        ]
+                        )
+
+
+
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -493,7 +499,10 @@ class CategorySearchView(ListAPIView):
                         این ویو امکان جستجوی دسته بندی را بر اساس نام دسته بندی فراهم میکند.پارامتر q باید با کوئری ارسال شود.
                             - توکن :‌نیاز ندارد.
                          """,
-                        responses={200:CategorySerializers(many=True)})
+                        responses={200:CategorySerializers(many=True)},
+                        manual_parameters=[
+                            openapi.Parameter('q', openapi.IN_QUERY, description="حست و جوی دسته بندی", type=openapi.TYPE_STRING),
+                        ]
+                        )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
-    
