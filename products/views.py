@@ -116,6 +116,7 @@ class CategoryListApiView(ListAPIView):
 
     serializer_class = CategorySerializers
     queryset = Category.objects.all()
+    pagination_class = None
     @swagger_auto_schema(
             tags=["home views"],
             operation_summary="لیست دسته بندی",
@@ -462,6 +463,8 @@ class ListProductLikedGenericView(ListAPIView):
 
 class ProductSearchView(ListAPIView):
     serializer_class = ProductSerializers
+    pagination_class = None
+
 
     def get_queryset(self):
         q = self.request.query_params.get("q", "")
@@ -489,6 +492,7 @@ class ProductSearchView(ListAPIView):
 
 class CategorySearchView(ListAPIView):
     serializer_class = CategorySerializers
+    pagination_class = None
 
     def get_queryset(self):
         q = self.request.query_params.get("q", "")
