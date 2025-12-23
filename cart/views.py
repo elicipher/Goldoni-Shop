@@ -1,16 +1,16 @@
-from rest_framework.views import APIView 
-from rest_framework.generics import RetrieveUpdateDestroyAPIView , ListAPIView , CreateAPIView 
+from rest_framework.views import APIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView , ListAPIView , CreateAPIView
 from .models import Cart , CartItem , Order , OrderItem
-from .serializers import (CartItemCreateSerializer , 
-                          CartSerializers , 
-                          CartItemListSerializers , 
-                          OrderSerializers , 
+from .serializers import (CartItemCreateSerializer ,
+                          CartSerializers ,
+                          CartItemListSerializers ,
+                          OrderSerializers ,
                           OrderItemSerializers,
                           CartItemUpdateSerializer)
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
-from rest_framework.permissions import IsAuthenticated 
+from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
@@ -21,7 +21,7 @@ class CartAddItemView(CreateAPIView):
     serializer_class = CartItemCreateSerializer
     permission_classes = [IsAuthenticated]
     @swagger_auto_schema(
-            tags=["cart"], 
+            tags=["cart"],
             operation_summary="افزودن سبد خرید",
             operation_description=
             """
@@ -60,7 +60,7 @@ class CartAddItemView(CreateAPIView):
         else:
             self.perform_create(serializer, cart, quantity)
             return Response({"message": "کالا به سبد خرید شما اضافه شد"}, status=status.HTTP_200_OK)
-        
+
     def perform_create(self, serializer, cart, quantity):
         """Create a new CartItem in the cart with the specified quantity."""
         CartItem.objects.create(
@@ -89,7 +89,7 @@ class CartItemUpdateView(RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         """Return only the cart items that belong to the current user."""
         return CartItem.objects.filter(cart__user=self.request.user.id)
-    
+
     def get_serializer_class(self):
         """
         Use CartItemCreateSerializer for PATCH, PUT, DELETE operations.
@@ -106,7 +106,7 @@ class CartItemUpdateView(RetrieveUpdateDestroyAPIView):
             responses={
                 200 :"OK"
             }
-            
+
             )
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
@@ -139,7 +139,7 @@ class CartItemUpdateView(RetrieveUpdateDestroyAPIView):
             )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
-    
+
     @swagger_auto_schema(auto_schema=None )
 
     def put(self, request, *args, **kwargs):
@@ -193,7 +193,7 @@ class CartItemListView(ListAPIView):
             )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
-    
+
     def get_queryset(self):
         """Return only the carts that belong to the current user."""
         return Cart.objects.filter(user=self.request.user)
@@ -202,7 +202,7 @@ class CartItemListView(ListAPIView):
 class OrderCreateView(APIView):
     permission_classes = [IsAuthenticated]
     @swagger_auto_schema(
-            tags=["order"] , 
+            tags=["order"] ,
             operation_summary="ایجاد سفارش",
             operation_description=
             """
@@ -219,9 +219,9 @@ class OrderCreateView(APIView):
                                  "order_id" : openapi.Schema(type=openapi.TYPE_INTEGER)
 
                             }
-                         ),   
+                         ),
                     ),
-                
+
                 400:openapi.Response(
                     description="Bad Request",
                     schema=openapi.Schema(
@@ -230,15 +230,15 @@ class OrderCreateView(APIView):
 
                 )
             }
-            
-            
+
+
     )
     def post(self, request, *args, **kwargs):
         user = request.user
         cart = Cart.objects.filter(user = user).first()
         if not cart or not cart.items.exists():
             return Response({"message":"سبد خرید شما خالی است."} , status= status.HTTP_400_BAD_REQUEST)
-        
+
         with transaction.atomic():
             order = Order.objects.create(user = user , total_amount = cart.total_price())
             for item in cart.items.all():
@@ -248,8 +248,8 @@ class OrderCreateView(APIView):
                     quantity=item.quantity,
                 )
             cart.items.all().delete()
-         
-    
+
+
         return Response({"message": "سفارش شما ثبت شد", "order_id": order.id}, status=status.HTTP_201_CREATED)
 
 #region lists
@@ -257,10 +257,10 @@ class OrderListView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = OrderSerializers
     queryset = Order.objects.all()
-    
+
     def get_queryset(self):
         return Order.objects.filter( user = self.request.user.id)
-    
+
     @swagger_auto_schema(
             tags=["Profile Screen"],
             operation_summary="لیست سفارشات ",
@@ -268,16 +268,16 @@ class OrderListView(ListAPIView):
             "- توکن : نیاز دارد",
         )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs) 
-    
+        return super().get(request, *args, **kwargs)
+
 class OrderListshippingView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = OrderSerializers
     queryset = Order.objects.all()
-    
+
     def get_queryset(self):
         return Order.objects.filter(status  = "shipping" , user = self.request.user.id)
-    
+
     @swagger_auto_schema(
             tags=["Profile Screen"],
             operation_summary="لیست سفارشات جاری",
@@ -294,7 +294,7 @@ class OrderListDeliveredView(ListAPIView):
 
     def get_queryset(self):
         return Order.objects.filter(status  = 'delivered' , user = self.request.user.id)
-    
+
     @swagger_auto_schema(
             tags=["Profile Screen"],
             operation_summary="لیست سفارشات تحویل داده شده",
@@ -311,7 +311,7 @@ class OrderListReturnedView(ListAPIView):
     queryset = Order.objects.all()
     def get_queryset(self):
         return Order.objects.filter(status  = 'returned', user = self.request.user.id)
-    
+
     @swagger_auto_schema(
             tags=["Profile Screen"],
             operation_summary= "لیست سفارشات مرجوع شده",
@@ -329,22 +329,22 @@ class OrderItemRetrieveView(RetrieveUpdateDestroyAPIView):
     queryset = OrderItem.objects.all()
     lookup_field = 'order_id'
 
-    @swagger_auto_schema(tags=["order"] , 
+    @swagger_auto_schema(tags=["order"] ,
                         operation_summary="نمایش جزئيات سفارش",
                         operation_description="این ویو جزئیات سفارش کاربر را نشان می دهد" \
                         "- توکن : نیاز دارد"
                          )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
-    
-    @swagger_auto_schema(tags=["order"] , 
+
+    @swagger_auto_schema(tags=["order"] ,
                          operation_summary="ویرایش سفارش",
                          operation_description="سفارش کاربر را ویرایش میکند " \
                          "- توکن : نیاز دارد",
                          request_body=OrderItemSerializers)
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
-    
+
     @swagger_auto_schema(tags=["order"] ,
                         operation_summary="حذف سفارش",
                         operation_description= "آیتم سفارش کاربر را حذف میکند" \
@@ -352,17 +352,17 @@ class OrderItemRetrieveView(RetrieveUpdateDestroyAPIView):
                         )
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
-    
+
     @swagger_auto_schema(auto_schema=None )
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
-    
-    
+
+
 
     def get_queryset(self):
         order_id = self.kwargs.get('order_id')
 
         return OrderItem.objects.filter(order__user = self.request.user.id  , order__id = order_id)
-    
+
 
 
