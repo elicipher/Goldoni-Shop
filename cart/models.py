@@ -31,7 +31,7 @@ class CartItem(models.Model):
     cart = models.ForeignKey(Cart , on_delete= models.CASCADE ,related_name="items" )
     product = models.ForeignKey(Product , on_delete= models.CASCADE )
     quantity = models.PositiveSmallIntegerField(validators=[MinValueValidator(1) , MaxValueValidator(10)],default=1)
-    total_price = models.PositiveIntegerField()
+    total_price = models.PositiveIntegerField(blank=True)
 
 
 
@@ -41,7 +41,7 @@ class CartItem(models.Model):
 
     def save(self, *args, **kwargs):
         if self.product:  # مطمئن میشیم محصول انتخاب شده
-            self.total_price = self.product.price * self.quantity
+            self.total_price = self.product.final_price * self.quantity
         super().save(*args, **kwargs)
 
 
