@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-le74#-o237l)3o6u7_pi-0*wda)b2)qcf%)!9*kd=)#q&lonbv
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['Goldonisite12.pythonanywhere.com']
+# ALLOWED_HOSTS = ['Goldonisite12.pythonanywhere.com']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'products.apps.ProductsConfig',
     'cart.apps.CartConfig',
+    'chatbot.apps.ChatbotConfig',
 
     #third-party apps
     'rest_framework',
@@ -206,9 +208,9 @@ SWAGGER_SETTINGS = {
     'DOC_EXPANSION': 'none',   # همه endpoint ها از اول بسته باشن
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "https://goldonisite12.pythonanywhere.com",
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "https://goldonisite12.pythonanywhere.com",
+# ]
 
 CORS_ALLOW_ALL_ORIGINS = True  # برای تست
 IRANIAN_CITIES_ADMIN_ADD_READONLY_ENABLED = True
