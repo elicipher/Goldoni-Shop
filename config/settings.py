@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'products.apps.ProductsConfig',
     'cart.apps.CartConfig',
     'chatbot.apps.ChatbotConfig',
+    'blog.apps.BlogConfig',
 
     #third-party apps
     'rest_framework',
