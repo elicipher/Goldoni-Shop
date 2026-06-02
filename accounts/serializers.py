@@ -4,25 +4,25 @@ from .models import OTPCode , User , Address
 
 
 class SendOTPCodeSerializers(serializers.Serializer):
-    
+
     phone_number = serializers.CharField(max_length=11)
 
     def validate_phone_number(self, value):
 
         if not value.startswith("09"):
             raise serializers.ValidationError("شماره تلفن نامعتبر است")
-        
+
         if not value.isdigit():
             raise serializers.ValidationError("شماره تلفن باید فقط شامل عدد باشد.")
-        
+
         if len(value) < 10 or len(value) > 11 :
             raise serializers.ValidationError("مقدار وارد شده شماره تلفن اشتباه می باشد")
-        
+
         if not value.isdigit():
             raise serializers.ValidationError("شماره تلفن فقط می‌تواند عدد باشد.")
-        
+
         return value
-    
+
 
 class VerifyOTPCodeSerializers(serializers.Serializer):
     code = serializers.CharField(max_length = 6)
@@ -49,12 +49,12 @@ class VerifyOTPCodeSerializers(serializers.Serializer):
         return data
 
 
-        
+
 class UserRegisterSerializers(serializers.ModelSerializer):
     address = serializers.CharField(required = True)
     birthday_date = serializers.DateField(required = True)
-    latitude = serializers.DecimalField(required = True  , max_digits= 9  , decimal_places= 6)
-    longitude = serializers.DecimalField(required = True , max_digits= 9  , decimal_places= 6)
+    latitude = serializers.DecimalField(required = True  , max_digits= 40  , decimal_places=14)
+    longitude = serializers.DecimalField(required = True , max_digits= 40  , decimal_places= 14)
 
 
 
@@ -72,10 +72,10 @@ class UserRegisterSerializers(serializers.ModelSerializer):
     def validate_phone_number(self, value ):
         if not value.isdigit() or len(value) != 11:
             raise serializers.ValidationError("شماره تلفن باید فقط شامل ۱۱ رقم باشد.")
-        if not value.startswith("09") : 
+        if not value.startswith("09") :
             raise serializers.ValidationError("شماره تلفن نامعتبر است")
         return value
-    
+
     def validate_national_code(self, value):
         if len(value) != 10  or not value.isdigit() :
             raise serializers.ValidationError("کد ملی باید شامل ۱۰ رقم باشد")
@@ -83,8 +83,8 @@ class UserRegisterSerializers(serializers.ModelSerializer):
             raise serializers.ValidationError("کد ملی باید یکتا باشد")
 
         return value
-    
- 
+
+
 
 class AddressSerializers(serializers.ModelSerializer):
 
@@ -92,7 +92,7 @@ class AddressSerializers(serializers.ModelSerializer):
         model = Address
         fields = "__all__"
 
-    
+
 
 
 

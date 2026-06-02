@@ -4,7 +4,7 @@ from .managers import UserManager
 from django.utils import timezone
 from datetime import timedelta
 import random
-from iranian_cities.fields import ProvinceField , CityField 
+from iranian_cities.fields import ProvinceField , CityField
 # Create your models here.
 
 class User(AbstractBaseUser):
@@ -19,8 +19,8 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
 
-    latitude = models.DecimalField(max_digits=9, decimal_places=6 , null=True , blank= False)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6 , null=True , blank= False)
+    latitude = models.DecimalField(max_digits=40, decimal_places=14 , null=True , blank= False)
+    longitude = models.DecimalField(max_digits=40, decimal_places=14 , null=True , blank= False)
 
     last_login = models.DateTimeField(auto_now=True)
 
