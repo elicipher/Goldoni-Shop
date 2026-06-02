@@ -1,7 +1,10 @@
 # Goldoni Project API
 
-بک‌اند فروشگاهی نوشته شده با Django و Django REST Framework.
-این پروژه شامل ماژول‌های حساب کاربری، محصولات، سبد خرید/سفارش، وبلاگ و چت‌بات FAQ است.
+این پروژه بک‌اند یک اپلیکیشن فروش گل است که با Django و Django REST Framework توسعه داده شده و به یک اپلیکیشن Flutter متصل می‌شود. هدف اصلی، پیاده‌سازی یک API ساختاریافته برای مدیریت کاربران، محصولات و سفارش‌ها بوده است.
+
+## اپلیکیشن 
+لینک ریپازیتوری اپلیکیشن ساخته شده توسط همکارم :
+https://github.com/FarzinNs83/goldooni.git
 
 ## تکنولوژی‌ها
 - Python
@@ -36,8 +39,8 @@
 1. کلون پروژه:
 
 ```bash
-git clone <repo-url>
-cd goldoni-project
+git clone https://github.com/elicipher/Goldoni-Shop.git
+cd Goldoni-Shop
 ```
 
 2. ساخت و فعال‌سازی محیط مجازی:
@@ -143,10 +146,4 @@ Authorization: Bearer <access_token>
 
 برای محیط Production حتما این مقادیر را ایمن‌سازی کنید.
 
-## اجرای تست‌ها
-```bash
-python manage.py test
-```
 
-## لایسنس
-در صورت نیاز، بخش لایسنس را بر اساس سیاست پروژه تکمیل کنید.
